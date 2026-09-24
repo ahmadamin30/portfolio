@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String?  @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
+model Project {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String   @db.Text
+  imageUrl     String
+  liveUrl      String?
+  githubUrl    String?
+  tags         Json     // Stores array of strings e.g. ["React", "TypeScript"]
+  featured     Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model Skill {
+  id           Int      @id @default(autoincrement())
+  name         String
+  category     String   // Frontend | Backend | Database | Tools
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("skills")
+}
+
+model Message {
+  id          Int      @id @default(autoincrement())
+  senderName  String
+  senderEmail String
+  subject     String?
+  messageBody String   @db.Text
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("messages")
+}
