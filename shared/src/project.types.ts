@@ -1,15 +1,25 @@
 export interface Project {
   id: number;
-  title: string;
-  description: string;
+  titleAr: string;
+  titleEn: string;
+  titleTr: string;
+  descriptionAr: string;
+  descriptionEn: string;
+  descriptionTr: string;
   imageUrl: string;
-  liveUrl?: string;
-  githubUrl?: string;
+  liveUrl?: string | null;
+  githubUrl?: string | null;
   tags: string[];
-  featured: boolean;
-  displayOrder: number;
+  isFeatured: boolean;
+  orderIndex: number;
   createdAt?: string;
   updatedAt?: string;
+
+  // Optional legacy fields for backwards compatibility
+  title?: string;
+  description?: string;
+  featured?: boolean;
+  displayOrder?: number;
 }
 
 export type CreateProjectInput = Omit<Project, 'id' | 'createdAt' | 'updatedAt'>;

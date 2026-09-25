@@ -15,7 +15,7 @@ async function seedAdmin(): Promise<void> {
     });
 
     if (existing) {
-      console.log(`ℹ️ ‍Admin account (${email}) already exists. Skipping.`);
+      console.log(`ℹ️‍Admin account (${email}) already exists. Skipping.`);
       process.exit(0);
     }
 

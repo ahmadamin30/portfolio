@@ -3,6 +3,7 @@ import authRoutes from './auth.routes';
 import projectRoutes from './project.routes';
 import skillRoutes from './skill.routes';
 import messageRoutes from './message.routes';
+import settingsRoutes from '../modules/settings/settings.routes';
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use('/auth', authRoutes);
 router.use('/projects', projectRoutes);
 router.use('/skills', skillRoutes);
 router.use('/messages', messageRoutes);
+router.use('/settings', settingsRoutes);
 
 export default router;

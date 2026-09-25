@@ -58,7 +58,7 @@ const removeLocalFile = (fileUrl: string | null | undefined): void => {
 
 /**
  * @route   GET /api/projects
- * @desc    Get all projects (ordered by displayOrder ASC, createdAt DESC)
+ * @desc    Get all projects (ordered by orderIndex ASC, createdAt DESC)
  * @access  Public
  */
 export const getAllProjects = async (
@@ -69,7 +69,7 @@ export const getAllProjects = async (
   try {
     const projects = await prisma.project.findMany({
       orderBy: [
-        { displayOrder: 'asc' },
+        { orderIndex: 'asc' },
         { createdAt: 'desc' },
       ],
     });
@@ -96,7 +96,7 @@ export const getProjectById = async (
 ): Promise<void> => {
   try {
     const id = Number(req.params.id);
-    if (isNaN(id)) {
+    if (isNaN(id) || id <= 0) {
       throw new AppError('Invalid project ID parameter', 400);
     }
 
@@ -119,7 +119,7 @@ export const getProjectById = async (
 
 /**
  * @route   POST /api/projects
- * @desc    Create a new project with optional image upload
+ * @desc    Create a new project with optional image upload (multilingual support)
  * @access  Protected (Admin only)
  */
 export const createProject = async (
@@ -128,15 +128,36 @@ export const createProject = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { title, description, liveUrl, githubUrl, tags, featured, displayOrder } = req.body;
+    const {
+      titleAr,
+      titleEn,
+      titleTr,
+      title,
+      descriptionAr,
+      descriptionEn,
+      descriptionTr,
+      description,
+      liveUrl,
+      githubUrl,
+      tags,
+      isFeatured,
+      featured,
+      orderIndex,
+      displayOrder,
+    } = req.body;
 
-    if (!title || typeof title !== 'string' || !title.trim()) {
-      throw new AppError('Project title is required', 400);
+    // Normalizing multilingual title & description with legacy fallbacks
+    const resolvedTitleEn = typeof titleEn === 'string' && titleEn.trim() ? titleEn.trim() : (typeof title === 'string' ? title.trim() : '');
+    const resolvedTitleAr = typeof titleAr === 'string' && titleAr.trim() ? titleAr.trim() : resolvedTitleEn;
+    const resolvedTitleTr = typeof titleTr === 'string' && titleTr.trim() ? titleTr.trim() : resolvedTitleEn;
+
+    if (!resolvedTitleEn && !resolvedTitleAr && !resolvedTitleTr) {
+      throw new AppError('Project title is required in at least one language (Arabic, English, or Turkish)', 400);
     }
 
-    if (!description || typeof description !== 'string' || !description.trim()) {
-      throw new AppError('Project description is required', 400);
-    }
+    const resolvedDescEn = typeof descriptionEn === 'string' ? descriptionEn.trim() : (typeof description === 'string' ? description.trim() : '');
+    const resolvedDescAr = typeof descriptionAr === 'string' ? descriptionAr.trim() : resolvedDescEn;
+    const resolvedDescTr = typeof descriptionTr === 'string' ? descriptionTr.trim() : resolvedDescEn;
 
     // Determine imageUrl: uploaded file takes priority, then body imageUrl
     let imageUrl = '';
@@ -151,28 +172,41 @@ export const createProject = async (
     }
 
     const parsedTags = parseTags(tags);
-    const isFeatured = featured === true || featured === 'true' || featured === '1' || featured === 1;
-    const orderNumber = displayOrder !== undefined ? Number(displayOrder) || 0 : 0;
+    const featuredFlag = isFeatured === true || isFeatured === 'true' || featured === true || featured === 'true' || isFeatured === 1 || featured === 1;
+
+    let orderNum = 0;
+    if (orderIndex !== undefined) {
+      orderNum = Number(orderIndex);
+    } else if (displayOrder !== undefined) {
+      orderNum = Number(displayOrder);
+    }
+    if (isNaN(orderNum)) {
+      orderNum = 0;
+    }
 
     const project = await prisma.project.create({
       data: {
-        title: title.trim(),
-        description: description.trim(),
+        titleAr: resolvedTitleAr || resolvedTitleEn,
+        titleEn: resolvedTitleEn || resolvedTitleAr,
+        titleTr: resolvedTitleTr || resolvedTitleEn,
+        descriptionAr: resolvedDescAr,
+        descriptionEn: resolvedDescEn,
+        descriptionTr: resolvedDescTr,
         imageUrl,
         liveUrl: liveUrl && typeof liveUrl === 'string' && liveUrl.trim() ? liveUrl.trim() : null,
         githubUrl: githubUrl && typeof githubUrl === 'string' && githubUrl.trim() ? githubUrl.trim() : null,
         tags: parsedTags,
-        featured: isFeatured,
-        displayOrder: orderNumber,
+        isFeatured: featuredFlag,
+        orderIndex: orderNum,
       },
     });
 
     res.status(201).json({
       success: true,
+      message: 'Project created successfully',
       data: project,
     });
   } catch (error) {
-    // Clean up uploaded file if database insert failed
     if (req.file) {
       removeLocalFile(`/uploads/${req.file.filename}`);
     }
@@ -192,7 +226,7 @@ export const updateProject = async (
 ): Promise<void> => {
   try {
     const id = Number(req.params.id);
-    if (isNaN(id)) {
+    if (isNaN(id) || id <= 0) {
       throw new AppError('Invalid project ID parameter', 400);
     }
 
@@ -204,27 +238,53 @@ export const updateProject = async (
       throw new AppError('Project not found', 404);
     }
 
-    const { title, description, liveUrl, githubUrl, tags, featured, displayOrder } = req.body;
+    const {
+      titleAr,
+      titleEn,
+      titleTr,
+      title,
+      descriptionAr,
+      descriptionEn,
+      descriptionTr,
+      description,
+      liveUrl,
+      githubUrl,
+      tags,
+      isFeatured,
+      featured,
+      orderIndex,
+      displayOrder,
+    } = req.body;
 
     interface ProjectUpdatePayload {
-      title?: string;
-      description?: string;
+      titleAr?: string;
+      titleEn?: string;
+      titleTr?: string;
+      descriptionAr?: string;
+      descriptionEn?: string;
+      descriptionTr?: string;
       imageUrl?: string;
       liveUrl?: string | null;
       githubUrl?: string | null;
       tags?: string[];
-      featured?: boolean;
-      displayOrder?: number;
+      isFeatured?: boolean;
+      orderIndex?: number;
     }
 
     const updateData: ProjectUpdatePayload = {};
 
-    if (title !== undefined && typeof title === 'string') {
-      updateData.title = title.trim();
+    if (titleAr !== undefined && typeof titleAr === 'string') updateData.titleAr = titleAr.trim();
+    if (titleEn !== undefined && typeof titleEn === 'string') updateData.titleEn = titleEn.trim();
+    if (titleTr !== undefined && typeof titleTr === 'string') updateData.titleTr = titleTr.trim();
+    if (title !== undefined && typeof title === 'string' && !updateData.titleEn) {
+      updateData.titleEn = title.trim();
     }
 
-    if (description !== undefined && typeof description === 'string') {
-      updateData.description = description.trim();
+    if (descriptionAr !== undefined && typeof descriptionAr === 'string') updateData.descriptionAr = descriptionAr.trim();
+    if (descriptionEn !== undefined && typeof descriptionEn === 'string') updateData.descriptionEn = descriptionEn.trim();
+    if (descriptionTr !== undefined && typeof descriptionTr === 'string') updateData.descriptionTr = descriptionTr.trim();
+    if (description !== undefined && typeof description === 'string' && !updateData.descriptionEn) {
+      updateData.descriptionEn = description.trim();
     }
 
     if (liveUrl !== undefined) {
@@ -239,18 +299,22 @@ export const updateProject = async (
       updateData.tags = parseTags(tags);
     }
 
-    if (featured !== undefined) {
-      updateData.featured = featured === true || featured === 'true' || featured === '1' || featured === 1;
+    if (isFeatured !== undefined || featured !== undefined) {
+      const val = isFeatured !== undefined ? isFeatured : featured;
+      updateData.isFeatured = val === true || val === 'true' || val === 1 || val === '1';
     }
 
-    if (displayOrder !== undefined) {
-      updateData.displayOrder = Number(displayOrder) || 0;
+    const targetOrder = orderIndex !== undefined ? orderIndex : displayOrder;
+    if (targetOrder !== undefined) {
+      const parsedOrder = Number(targetOrder);
+      if (!isNaN(parsedOrder)) {
+        updateData.orderIndex = parsedOrder;
+      }
     }
 
     // Handle new image upload
     if (req.file) {
       updateData.imageUrl = `/uploads/${req.file.filename}`;
-      // Remove old local image file
       removeLocalFile(existingProject.imageUrl);
     } else if (req.body.imageUrl && typeof req.body.imageUrl === 'string') {
       updateData.imageUrl = req.body.imageUrl.trim();
@@ -263,6 +327,7 @@ export const updateProject = async (
 
     res.status(200).json({
       success: true,
+      message: 'Project updated successfully',
       data: updatedProject,
     });
   } catch (error) {
@@ -285,7 +350,7 @@ export const deleteProject = async (
 ): Promise<void> => {
   try {
     const id = Number(req.params.id);
-    if (isNaN(id)) {
+    if (isNaN(id) || id <= 0) {
       throw new AppError('Invalid project ID parameter', 400);
     }
 
@@ -297,10 +362,8 @@ export const deleteProject = async (
       throw new AppError('Project not found', 404);
     }
 
-    // Remove local uploaded asset if applicable
     removeLocalFile(project.imageUrl);
 
-    // Delete record from database
     await prisma.project.delete({
       where: { id },
     });

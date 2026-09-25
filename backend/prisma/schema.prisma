@@ -19,18 +19,57 @@ model Admin {
   @@map("admins")
 }
 
+model SiteSettings {
+  id                Int      @id @default(1)
+  primaryColor      String   @default("#3B82F6")
+  fontFamily        String   @default("Inter")
+  headingFontFamily String   @default("Inter")
+  logoUrl           String?
+  faviconUrl        String?
+  resumeUrl         String?
+  avatarUrl         String?
+  githubUrl         String?
+  linkedinUrl       String?
+  twitterUrl        String?
+  emailContact      String?
+
+  fullNameAr        String   @default("")
+  fullNameEn        String   @default("")
+  fullNameTr        String   @default("")
+
+  jobTitleAr        String   @default("")
+  jobTitleEn        String   @default("")
+  jobTitleTr        String   @default("")
+
+  bioAr             String   @default("") @db.Text
+  bioEn             String   @default("") @db.Text
+  bioTr             String   @default("") @db.Text
+
+  aboutTextAr       String   @default("") @db.Text
+  aboutTextEn       String   @default("") @db.Text
+  aboutTextTr       String   @default("") @db.Text
+
+  updatedAt         DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
 model Project {
-  id           Int      @id @default(autoincrement())
-  title        String
-  description  String   @db.Text
-  imageUrl     String
-  liveUrl      String?
-  githubUrl    String?
-  tags         Json     // Stores array of strings e.g. ["React", "TypeScript"]
-  featured     Boolean  @default(false)
-  displayOrder Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  titleAr       String   @default("")
+  titleEn       String   @default("")
+  titleTr       String   @default("")
+  descriptionAr String   @default("") @db.Text
+  descriptionEn String   @default("") @db.Text
+  descriptionTr String   @default("") @db.Text
+  imageUrl      String
+  liveUrl       String?
+  githubUrl     String?
+  tags          Json
+  isFeatured    Boolean  @default(false)
+  orderIndex    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("projects")
 }
@@ -38,7 +77,7 @@ model Project {
 model Skill {
   id           Int      @id @default(autoincrement())
   name         String
-  category     String   // Frontend | Backend | Database | Tools
+  category     String
   displayOrder Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
