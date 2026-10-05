@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   getSettings,
   updateSettings,
+  updateCopywriting,
   uploadAsset,
 } from './settings.controller';
 import { authenticate as authenticateAdmin } from '../../middlewares/auth.middleware';
@@ -22,6 +23,13 @@ router.get('/', getSettings);
  * @access  Protected (Admin only)
  */
 router.put('/', authenticateAdmin, updateSettings);
+
+/**
+ * @route   PATCH /api/settings/copywriting
+ * @desc    Update individual section headings and copywriting
+ * @access  Protected (Admin only)
+ */
+router.patch('/copywriting', authenticateAdmin, updateCopywriting);
 
 /**
  * @route   POST /api/settings/upload

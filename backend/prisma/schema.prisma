@@ -33,6 +33,7 @@ model SiteSettings {
   twitterUrl        String?
   emailContact      String?
 
+  // Multilingual Profile/Bio fields
   fullNameAr        String   @default("")
   fullNameEn        String   @default("")
   fullNameTr        String   @default("")
@@ -41,15 +42,51 @@ model SiteSettings {
   jobTitleEn        String   @default("")
   jobTitleTr        String   @default("")
 
-  bioAr             String   @default("") @db.Text
-  bioEn             String   @default("") @db.Text
-  bioTr             String   @default("") @db.Text
+  bioAr             String   @db.Text
+  bioEn             String   @db.Text
+  bioTr             String   @db.Text
 
-  aboutTextAr       String   @default("") @db.Text
-  aboutTextEn       String   @default("") @db.Text
-  aboutTextTr       String   @default("") @db.Text
+  aboutTextAr       String   @db.Text
+  aboutTextEn       String   @db.Text
+  aboutTextTr       String   @db.Text
 
-  updatedAt         DateTime @updatedAt
+  aboutParagraph2Ar String?  @db.Text
+  aboutParagraph2En String?  @db.Text
+  aboutParagraph2Tr String?  @db.Text
+
+  // Profile & Hero (Enterprise CMS additions)
+  displayNameAr        String   @default("")
+  displayNameEn        String   @default("")
+  displayNameTr        String   @default("")
+
+  heroHeadlineAr       String   @default("")
+  heroHeadlineEn       String   @default("")
+  heroHeadlineTr       String   @default("")
+
+  availabilityStatusAr String   @default("")
+  availabilityStatusEn String   @default("")
+  availabilityStatusTr String   @default("")
+
+  locationAr           String   @default("")
+  locationEn           String   @default("")
+  locationTr           String   @default("")
+
+  profilePhotoUrl      String?
+  contactEmail         String?
+
+  // Section Headings Copywriting (badge, title, subtitle across Ar/En/Tr)
+  sectionCopywriting   Json?
+
+  // SEO Hub
+  siteName             String   @default("Portfolio")
+  canonicalUrl         String?
+  defaultTitle         String   @default("Portfolio")
+  metaDescription      String?  @db.Text
+  titleTemplate        String   @default("%s | Portfolio")
+  robotsDirectives     String   @default("index, follow")
+  keywords             String   @default("")
+
+  updatedAt            DateTime @updatedAt
 
   @@map("site_settings")
 }
@@ -59,9 +96,9 @@ model Project {
   titleAr       String   @default("")
   titleEn       String   @default("")
   titleTr       String   @default("")
-  descriptionAr String   @default("") @db.Text
-  descriptionEn String   @default("") @db.Text
-  descriptionTr String   @default("") @db.Text
+  descriptionAr String   @db.Text
+  descriptionEn String   @db.Text
+  descriptionTr String   @db.Text
   imageUrl      String
   liveUrl       String?
   githubUrl     String?
@@ -95,4 +132,121 @@ model Message {
   createdAt   DateTime @default(now())
 
   @@map("messages")
+}
+
+model WorkflowStep {
+  id            Int      @id @default(autoincrement())
+  stepNumber    Int
+  titleAr       String   @default("")
+  titleEn       String   @default("")
+  titleTr       String   @default("")
+  descriptionAr String   @db.Text
+  descriptionEn String   @db.Text
+  descriptionTr String   @db.Text
+  orderIndex    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("workflow_steps")
+}
+
+model Experience {
+  id                     Int      @id @default(autoincrement())
+  type                   String
+  degreeOrRoleAr         String   @default("")
+  degreeOrRoleEn         String   @default("")
+  degreeOrRoleTr         String   @default("")
+  institutionOrCompanyAr String   @default("")
+  institutionOrCompanyEn String   @default("")
+  institutionOrCompanyTr String   @default("")
+  startDate              String   @default("")
+  endDate                String?
+  locationAr             String   @default("")
+  locationEn             String   @default("")
+  locationTr             String   @default("")
+  icon                   String?
+  nodeColor              String   @default("#3B82F6")
+  descriptionAr          String   @db.Text
+  descriptionEn          String   @db.Text
+  descriptionTr          String   @db.Text
+  orderIndex             Int      @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("experiences")
+}
+
+model Service {
+  id            Int      @id @default(autoincrement())
+  serviceNumber String   @default("")
+  titleAr       String   @default("")
+  titleEn       String   @default("")
+  titleTr       String   @default("")
+  descriptionAr String   @db.Text
+  descriptionEn String   @db.Text
+  descriptionTr String   @db.Text
+  icon          String?
+  isActive      Boolean  @default(true)
+  orderIndex    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("services")
+}
+
+model Faq {
+  id          Int      @id @default(autoincrement())
+  category    String   @default("Services & Scope")
+  questionAr  String   @default("")
+  questionEn  String   @default("")
+  questionTr  String   @default("")
+  answerAr    String   @db.Text
+  answerEn    String   @db.Text
+  answerTr    String   @db.Text
+  isPublished Boolean  @default(true)
+  orderIndex  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("faqs")
+}
+
+model SocialLink {
+  id         Int      @id @default(autoincrement())
+  platform   String
+  url        String
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("social_links")
+}
+
+model TranslationKey {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  valueAr   String   @db.Text
+  valueEn   String   @db.Text
+  valueTr   String   @db.Text
+  category  String   @default("general")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("translation_keys")
+}
+
+model Certificate {
+  id            Int      @id @default(autoincrement())
+  titleAr       String   @default("")
+  titleEn       String   @default("")
+  titleTr       String   @default("")
+  issuer        String
+  issueDate     String
+  credentialUrl String?
+  imageUrl      String?
+  orderIndex    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("certificates")
 }

@@ -45,6 +45,58 @@ export const updateSettings = async (
   }
 };
 
+interface UpdateCopywritingBody {
+  section?: string;
+  data?: settingsService.SectionCopywritingItem;
+  badgeAr?: string;
+  badgeEn?: string;
+  badgeTr?: string;
+  titleAr?: string;
+  titleEn?: string;
+  titleTr?: string;
+  subtitleAr?: string;
+  subtitleEn?: string;
+  subtitleTr?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * @route   PATCH /api/settings/copywriting
+ * @desc    Update individual section headings and copywriting
+ * @access  Protected (Admin only)
+ */
+export const updateCopywriting = async (
+  req: Request<unknown, unknown, UpdateCopywritingBody>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { section, data, ...rest } = req.body;
+
+    if (!section || typeof section !== 'string' || !section.trim()) {
+      throw new AppError('Section identifier is required (e.g., projects, skills, workflow, experience, services, faqs, about)', 400);
+    }
+
+    const targetSection = section.trim().toLowerCase();
+
+    // Determine copywriting content from either nested `data` object or body fields
+    const copywritingPayload: settingsService.SectionCopywritingItem = {
+      ...(data && typeof data === 'object' ? data : {}),
+      ...(rest as Record<string, string | undefined>),
+    };
+
+    const updated = await settingsService.updateSectionCopywriting(targetSection, copywritingPayload);
+
+    res.status(200).json({
+      success: true,
+      message: `Copywriting for section "${targetSection}" updated successfully`,
+      data: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * @route   POST /api/settings/upload
  * @desc    Upload brand assets (avatar, logo, resume PDF, etc.)
@@ -75,4 +127,11 @@ export const uploadAsset = async (
   } catch (error) {
     next(error);
   }
+};
+
+export default {
+  getSettings,
+  updateSettings,
+  updateCopywriting,
+  uploadAsset,
 };

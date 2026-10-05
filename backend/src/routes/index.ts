@@ -4,6 +4,13 @@ import projectRoutes from './project.routes';
 import skillRoutes from './skill.routes';
 import messageRoutes from './message.routes';
 import settingsRoutes from '../modules/settings/settings.routes';
+import workflowRoutes from '../modules/workflow/workflow.routes';
+import experienceRoutes from '../modules/experience/experience.routes';
+import serviceRoutes from '../modules/services/services.routes';
+import faqRoutes from '../modules/faqs/faqs.routes';
+import socialLinkRoutes from '../modules/social-links/socialLinks.routes';
+import translationRoutes from '../modules/translations/translations.routes';
+import certificateRoutes from '../modules/certificates/certificates.routes';
 
 const router = Router();
 
@@ -20,11 +27,20 @@ router.get('/health', (_req: Request, res: Response): void => {
   });
 });
 
-// Mount module sub-routers
+// Core portfolio modules
 router.use('/auth', authRoutes);
+router.use('/settings', settingsRoutes);
 router.use('/projects', projectRoutes);
 router.use('/skills', skillRoutes);
 router.use('/messages', messageRoutes);
-router.use('/settings', settingsRoutes);
+
+// Enterprise CMS modules
+router.use('/workflow', workflowRoutes);
+router.use('/experience', experienceRoutes);
+router.use('/services', serviceRoutes);
+router.use('/faqs', faqRoutes);
+router.use('/social-links', socialLinkRoutes);
+router.use('/translations', translationRoutes);
+router.use('/certificates', certificateRoutes);
 
 export default router;
