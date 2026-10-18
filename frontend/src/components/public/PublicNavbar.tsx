@@ -13,7 +13,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: '#workflow', labelKey: 'nav.workflow' },
   { id: '#projects', labelKey: 'nav.projects' },
   { id: '#skills', labelKey: 'nav.skills' },
-  { id: '#experience', labelKey: 'nav.experience' },
   { id: '#services', labelKey: 'nav.services' },
   { id: '#faq', labelKey: 'nav.faq' },
   { id: '#contact', labelKey: 'nav.contact' },
@@ -28,7 +27,7 @@ export const PublicNavbar: React.FC = () => {
   // Monitor scroll to update active section in floating capsule
   useEffect(() => {
     const handleScroll = () => {
-      const sectionIds = ['hero', 'about', 'workflow', 'projects', 'skills', 'experience', 'services', 'faq', 'contact'];
+      const sectionIds = ['hero', 'about', 'workflow', 'projects', 'skills', 'services', 'faq', 'contact'];
       const scrollY = window.scrollY + 180;
 
       for (const id of sectionIds) {

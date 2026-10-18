@@ -6,6 +6,7 @@ export type PortfolioLanguage = 'en' | 'ar' | 'tr';
 
 export interface PublicPortfolioContextType {
   language: PortfolioLanguage;
+  currentLanguage: PortfolioLanguage;
   setLanguage: (lang: PortfolioLanguage) => void;
   dir: 'ltr' | 'rtl';
   settings: SiteSettings | null;
@@ -205,6 +206,7 @@ export const PublicPortfolioProvider: React.FC<{ children: ReactNode }> = ({ chi
   const value: PublicPortfolioContextType = useMemo(
     () => ({
       language,
+      currentLanguage: language,
       setLanguage,
       dir,
       settings,

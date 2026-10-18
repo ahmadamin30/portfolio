@@ -3,10 +3,6 @@ import { motion } from 'framer-motion';
 import {
   RotateCcw,
   ShieldCheck,
-  GraduationCap,
-  Layers,
-  Mail,
-  Sparkles,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PublicPortfolioProvider, usePublicPortfolio } from '../../context/PublicPortfolioContext';
@@ -17,6 +13,8 @@ import HeroSection from '../../components/public/HeroSection';
 import AboutSection from '../../components/public/AboutSection';
 import ScrollRevealSection from '../../components/public/ScrollRevealSection';
 import SkillsSection from '../../components/public/SkillsSection';
+import ServicesSection from '../../components/public/ServicesSection';
+import ContactSection from '../../components/public/ContactSection';
 import { ProjectShowcase } from '@/components/ui/project-showcase';
 
 const HomePageContent: React.FC = () => {
@@ -41,18 +39,52 @@ const HomePageContent: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#09090b] text-zinc-100 selection:bg-sky-500/30 selection:text-white pb-28">
-      {/* Subtle Dotted Grid Background Pattern */}
-      <div
-        className="fixed inset-0 pointer-events-none opacity-45 -z-10"
-        style={{
-          backgroundImage: 'radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-        }}
-      />
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 selection:bg-zinc-200 dark:selection:bg-zinc-800 selection:text-zinc-900 dark:selection:text-white relative overflow-x-hidden flex flex-col items-center transition-colors duration-300">
+      
+      {/* GLOBAL FIXED AMBIENT ATMOSPHERE & GLOW ORBS (Spans seamlessly across all sections) */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        {/* Glow 1: Top-Right (around Hero / About) */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(circle 800px at 85% 20%, rgba(14, 165, 233, 0.07), transparent 70%)',
+          }}
+        />
 
-      {/* Soft Radial Glow Spotlight at Top Center */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] pointer-events-none -z-10 opacity-30 blur-[140px] bg-gradient-to-b from-blue-600/30 via-sky-500/10 to-transparent" />
+        {/* Glow 2: Middle-Left (around Projects / Skills) */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(circle 900px at 15% 55%, rgba(2, 132, 199, 0.05), transparent 70%)',
+          }}
+        />
+
+        {/* Glow 3: Bottom-Right (around Services / Contact) */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(circle 800px at 80% 85%, rgba(14, 165, 233, 0.06), transparent 70%)',
+          }}
+        />
+
+        {/* Unified Analog Film Grain Noise Overlay */}
+        <div
+          className="absolute inset-0 w-full h-full opacity-[0.20] dark:opacity-[0.24] mix-blend-overlay"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          }}
+        />
+
+        {/* Subtle Dotted Grid Background Pattern */}
+        <div
+          className="absolute inset-0 opacity-35 dark:opacity-20"
+          style={{
+            backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+            color: 'var(--dot-color, #94a3b8)',
+          }}
+        />
+      </div>
 
       {/* Advax Laser Split-Shutter Intro Preloader */}
       <AdvaxPreloader
@@ -61,7 +93,7 @@ const HomePageContent: React.FC = () => {
         onComplete={() => setIsRevealed(true)}
       />
 
-      {/* Minimal Top-Right Language Switcher Controls */}
+      {/* Minimal Top-Right Language Switcher & Theme Controls */}
       <TopCornerControls />
 
       {/* Floating Bottom Dock Navigation */}
@@ -88,110 +120,30 @@ const HomePageContent: React.FC = () => {
         {/* Section 03: Skills (Interactive LogoLoop Tech Arsenal) */}
         <SkillsSection />
 
-        {/* Section 04: Experience */}
-        <ScrollRevealSection id="experience" className="py-20 px-4 sm:px-8 max-w-6xl mx-auto w-full">
-          <div className="p-8 sm:p-12 rounded-3xl bg-zinc-900/40 border border-zinc-800/70 backdrop-blur-xl relative overflow-hidden group hover:border-zinc-700/80 transition-all">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div className="flex items-center gap-2.5">
-                <span className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                  <GraduationCap className="w-5 h-5" />
-                </span>
-                <div>
-                  <span className="text-[11px] font-mono text-amber-400 uppercase tracking-widest block">
-                    04 // CAREER TIMELINE
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                    {t('nav.experience')}
-                  </h2>
-                </div>
-              </div>
-              <span className="text-xs font-mono text-zinc-500">MILESTONES &amp; ROLES</span>
-            </div>
-            <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-3xl">
-              Chronological journey spanning full-stack development, software engineering leadership, and strategic product delivery.
-            </p>
-          </div>
-        </ScrollRevealSection>
+        {/* Section 04: Services & Capabilities (Integrated Workflow & FAQs) */}
+        <ServicesSection />
 
-        {/* Section 05: Services */}
-        <ScrollRevealSection id="services" className="py-20 px-4 sm:px-8 max-w-6xl mx-auto w-full">
-          <div className="p-8 sm:p-12 rounded-3xl bg-zinc-900/40 border border-zinc-800/70 backdrop-blur-xl relative overflow-hidden group hover:border-zinc-700/80 transition-all">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div className="flex items-center gap-2.5">
-                <span className="p-2.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
-                  <Layers className="w-5 h-5" />
-                </span>
-                <div>
-                  <span className="text-[11px] font-mono text-purple-400 uppercase tracking-widest block">
-                    05 // ARCHITECTURE PACKAGES
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                    {t('nav.services')}
-                  </h2>
-                </div>
-              </div>
-              <span className="text-xs font-mono text-zinc-500">SCOPE &amp; OFFERINGS</span>
-            </div>
-            <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-3xl">
-              Custom web application engineering, microservices restructuring, CMS integrations, and end-to-end technical consulting.
-            </p>
-          </div>
-        </ScrollRevealSection>
-
-        {/* Section 06: Contact */}
-        <ScrollRevealSection id="contact" className="py-20 px-4 sm:px-8 max-w-6xl mx-auto w-full">
-          <div className="p-8 sm:p-12 rounded-3xl bg-zinc-900/40 border border-zinc-800/70 backdrop-blur-xl relative overflow-hidden group hover:border-zinc-700/80 transition-all">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div className="flex items-center gap-2.5">
-                <span className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                  <Mail className="w-5 h-5" />
-                </span>
-                <div>
-                  <span className="text-[11px] font-mono text-emerald-400 uppercase tracking-widest block">
-                    06 // INITIATE DIALOGUE
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                    {t('nav.contact')}
-                  </h2>
-                </div>
-              </div>
-              <span className="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>OPEN FOR NEW ENGAGEMENTS</span>
-              </span>
-            </div>
-            <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-3xl mb-6">
-              Have a high-impact product idea or need architectural consultation? Reach out directly to discuss timelines and scope.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <a
-                href="mailto:contact@advax.dev"
-                className="px-6 py-3 rounded-full bg-white text-zinc-950 font-semibold text-xs sm:text-sm hover:bg-zinc-200 transition-all shadow-lg active:scale-95"
-              >
-                Send Message &rarr;
-              </a>
-            </div>
-          </div>
-        </ScrollRevealSection>
+        {/* Section 05: Contact & Inquiries (Direct Channels & Message Form) */}
+        <ContactSection />
 
         {/* Minimal Footer */}
-        <footer className="py-10 px-4 text-center flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-zinc-500 border-t border-zinc-900/60 mt-12">
+        <footer className="py-10 px-4 text-center flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-zinc-500 border-t border-zinc-200 dark:border-zinc-900/60 mt-12">
           <span>&copy; {new Date().getFullYear()} ADVAX. All rights reserved.</span>
-          <span className="text-zinc-800">|</span>
+          <span className="text-zinc-300 dark:text-zinc-800">|</span>
           <button
             type="button"
             onClick={handleReplayIntro}
-            className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Replay Intro</span>
           </button>
-          <span className="text-zinc-800">|</span>
+          <span className="text-zinc-300 dark:text-zinc-800">|</span>
           <Link
             to="/admin/login"
-            className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
             <span>CMS Admin</span>
           </Link>
         </footer>

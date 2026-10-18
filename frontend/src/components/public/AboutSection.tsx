@@ -47,10 +47,10 @@ export const AboutSection: React.FC = () => {
         {/* Left Column (LTR) / Right Column (RTL): Developer Portrait */}
         <div className="lg:col-span-5 relative">
           {/* Ambient Glow Backdrop */}
-          <div className="absolute -inset-1.5 rounded-3xl bg-gradient-to-tr from-sky-500/20 via-blue-600/10 to-transparent blur-xl opacity-60 group-hover:opacity-90 transition-opacity pointer-events-none" />
+          <div className="absolute -inset-1.5 rounded-3xl bg-gradient-to-tr from-sky-500/20 via-blue-600/10 to-transparent blur-xl opacity-40 dark:opacity-60 group-hover:opacity-80 transition-opacity pointer-events-none" />
 
           {/* Portrait Container */}
-          <div className="relative rounded-2xl overflow-hidden border border-zinc-800/80 bg-zinc-900/60 shadow-2xl group">
+          <div className="relative rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800/80 bg-zinc-100 dark:bg-zinc-900/60 shadow-xl dark:shadow-2xl group">
             <img
               src={imgSrc}
               onError={() => setImgSrc(defaultPhoto)}
@@ -76,18 +76,18 @@ export const AboutSection: React.FC = () => {
         {/* Right Column (LTR) / Left Column (RTL): Narrative & Story */}
         <div className="lg:col-span-7 space-y-6">
           {/* Section Badge Pill */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/80 border border-zinc-800/90 text-xs font-mono text-sky-400 tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 dark:bg-zinc-900/80 border border-sky-200 dark:border-zinc-800/90 text-xs font-mono text-sky-600 dark:text-sky-400 tracking-wider">
             <Terminal className="w-3.5 h-3.5" />
             <span>{badgeText}</span>
           </div>
 
           {/* Big Display Heading */}
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-[1.15]">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-zinc-900 dark:text-white tracking-tight leading-[1.15]">
             {headingText}
           </h2>
 
           {/* Narrative Paragraphs */}
-          <div className="space-y-4 text-zinc-400 text-base sm:text-lg leading-relaxed">
+          <div className="space-y-4 text-zinc-600 dark:text-zinc-400 text-base sm:text-lg leading-relaxed">
             <p>{paragraph1}</p>
             {paragraph2 && <p>{paragraph2}</p>}
           </div>
@@ -95,10 +95,10 @@ export const AboutSection: React.FC = () => {
           {/* 3-Pill Feature Highlights Box */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2">
             {/* Pill 1: Architecture */}
-            <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700/80 transition-all flex flex-col gap-1.5 group">
-              <div className="flex items-center gap-2 text-sky-400">
+            <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900/40 border border-zinc-200/90 dark:border-zinc-800/60 hover:border-zinc-300 dark:hover:border-zinc-700/80 shadow-sm dark:shadow-none transition-all flex flex-col gap-1.5 group">
+              <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400">
                 <Terminal className="w-4 h-4" />
-                <span className="text-xs font-mono font-bold tracking-wider uppercase text-zinc-200">
+                <span className="text-xs font-mono font-bold tracking-wider uppercase text-zinc-800 dark:text-zinc-200">
                   {t('about.feat.arch')}
                 </span>
               </div>
@@ -108,10 +108,10 @@ export const AboutSection: React.FC = () => {
             </div>
 
             {/* Pill 2: Performance */}
-            <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700/80 transition-all flex flex-col gap-1.5 group">
-              <div className="flex items-center gap-2 text-indigo-400">
+            <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900/40 border border-zinc-200/90 dark:border-zinc-800/60 hover:border-zinc-300 dark:hover:border-zinc-700/80 shadow-sm dark:shadow-none transition-all flex flex-col gap-1.5 group">
+              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
                 <Cpu className="w-4 h-4" />
-                <span className="text-xs font-mono font-bold tracking-wider uppercase text-zinc-200">
+                <span className="text-xs font-mono font-bold tracking-wider uppercase text-zinc-800 dark:text-zinc-200">
                   {t('about.feat.perf')}
                 </span>
               </div>
@@ -121,10 +121,10 @@ export const AboutSection: React.FC = () => {
             </div>
 
             {/* Pill 3: Precision */}
-            <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700/80 transition-all flex flex-col gap-1.5 group">
-              <div className="flex items-center gap-2 text-emerald-400">
+            <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900/40 border border-zinc-200/90 dark:border-zinc-800/60 hover:border-zinc-300 dark:hover:border-zinc-700/80 shadow-sm dark:shadow-none transition-all flex flex-col gap-1.5 group">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                 <Sparkles className="w-4 h-4" />
-                <span className="text-xs font-mono font-bold tracking-wider uppercase text-zinc-200">
+                <span className="text-xs font-mono font-bold tracking-wider uppercase text-zinc-800 dark:text-zinc-200">
                   {t('about.feat.prec')}
                 </span>
               </div>
@@ -139,7 +139,7 @@ export const AboutSection: React.FC = () => {
             <button
               type="button"
               onClick={scrollToContact}
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-white text-zinc-950 font-semibold text-xs sm:text-sm hover:bg-zinc-200 transition-all shadow-lg active:scale-95"
+              className="flex items-center gap-2 px-6 py-3 rounded-full bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 font-semibold text-xs sm:text-sm transition-all shadow-md active:scale-95 cursor-pointer"
             >
               <span>{t('about.cta.connect')}</span>
               <ArrowUpRight className="w-4 h-4" />
@@ -150,18 +150,18 @@ export const AboutSection: React.FC = () => {
                 href={settings.resumeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-zinc-900/80 hover:bg-zinc-800/80 border border-zinc-800 text-zinc-300 font-medium text-xs sm:text-sm transition-all active:scale-95"
+                className="flex items-center gap-2 px-6 py-3 rounded-full bg-zinc-100 hover:bg-zinc-200/80 dark:bg-zinc-900/80 dark:hover:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-300 font-medium text-xs sm:text-sm transition-all active:scale-95 cursor-pointer"
               >
-                <FileDown className="w-4 h-4 text-zinc-400" />
+                <FileDown className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
                 <span>{t('about.cta.resume')}</span>
               </a>
             ) : (
               <a
                 href="/cv.pdf"
                 download="Ahmad_Alamin_CV.pdf"
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-zinc-900/80 hover:bg-zinc-800/80 border border-zinc-800 text-zinc-300 font-medium text-xs sm:text-sm transition-all active:scale-95"
+                className="flex items-center gap-2 px-6 py-3 rounded-full bg-zinc-100 hover:bg-zinc-200/80 dark:bg-zinc-900/80 dark:hover:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-300 font-medium text-xs sm:text-sm transition-all active:scale-95 cursor-pointer"
               >
-                <FileDown className="w-4 h-4 text-zinc-400" />
+                <FileDown className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
                 <span>{t('about.cta.resume')}</span>
               </a>
             )}
