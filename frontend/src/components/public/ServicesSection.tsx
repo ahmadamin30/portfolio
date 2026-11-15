@@ -1,5 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Code2,
   Server,
@@ -9,7 +8,6 @@ import {
   ShieldCheck,
   Cpu,
   CheckCircle2,
-  ChevronDown,
   Sparkles,
   Lock,
   Workflow,
@@ -46,18 +44,6 @@ export interface WorkflowStepItem {
   descriptionAr: string;
   descriptionEn: string;
   descriptionTr: string;
-}
-
-export interface FaqItem {
-  id: number | string;
-  category?: string;
-  questionAr: string;
-  questionEn: string;
-  questionTr: string;
-  answerAr: string;
-  answerEn: string;
-  answerTr: string;
-  isPublished?: boolean;
 }
 
 export interface PillarItem {
@@ -358,69 +344,6 @@ const TECHNICAL_PILLARS: PillarItem[] = [
   },
 ];
 
-const DEFAULT_FAQS: FaqItem[] = [
-  {
-    id: 1,
-    questionEn: 'What is your primary technology stack for full-stack projects?',
-    questionAr: 'ما هي حزمة التقنيات الأساسية التي تعتمد عليها في تطوير المشاريع المتكاملة؟',
-    questionTr: 'Tam kapsamlı projeler için temel teknoloji yığınınız nedir?',
-    answerEn:
-      'Our core production stack leverages React 19, Next.js, and TypeScript on the client side, powered by Node.js, Express/NestJS, and Prisma with PostgreSQL/MySQL and Redis on the backend. Every project is containerized via Docker for seamless CI/CD delivery.',
-    answerAr:
-      'حزمتنا الأساسية تعتمد على React 19 و Next.js و TypeScript في الواجهة الأمامية، مدعومة بـ Node.js و Express/NestJS و Prisma مع PostgreSQL و Redis في الواجهة الخلفية، مع استخدام Docker لضمان سلاسة النشر.',
-    answerTr:
-      'Temel üretim yığınımız istemci tarafında React 19, Next.js ve TypeScript; sunucu tarafında ise Node.js, Express/NestJS, Prisma, PostgreSQL/MySQL ve Redis kullanır. Tüm projeler Docker ile konteynerize edilir.',
-  },
-  {
-    id: 2,
-    questionEn: 'Do I own the full source code and intellectual property after completion?',
-    questionAr: 'هل أمتلك كامل الكود المصدري وحقوق الملكية الفكرية بعد انتهاء المشروع؟',
-    questionTr: 'Proje tamamlandığında kaynak kodların ve fikri mülkiyetin tamamına sahip olur muyum?',
-    answerEn:
-      'Yes, 100%. Upon final project delivery and handover, all source code, architecture documentation, configuration files, and database schemas become entirely your property with zero vendor lock-in.',
-    answerAr:
-      'نعم بنسبة 100%. عند تسليم المشروع النهائي، تصبح جميع الأكواد المصدرية والمستندات التقنية وإعدادات النشر وقواعد البيانات ملكية تامة وحصرية لك دون أي قيود أو ربط مسبق.',
-    answerTr:
-      'Evet, kesinlikle %100. Proje teslimatı tamamlandığında tüm kaynak kodlar, mimari dokümanlar ve veri şemaları tamamen sizin mülkiyetinize geçer; satıcı bağımlılığı yoktur.',
-  },
-  {
-    id: 3,
-    questionEn: 'How do you handle scalability and traffic spikes?',
-    questionAr: 'كيف تضمن معمارية النظام التوسع وتحمل الزيادة المفاجئة في عدد الزوار؟',
-    questionTr: 'Ölçeklenebilirlik ve yoğun trafik artışlarını nasıl yönetiyorsunuz?',
-    answerEn:
-      'We engineer systems with modular microservices, connection pooling, multi-tier Redis caching, and stateless authentication (JWT). This architecture allows individual services to scale horizontally with minimal latency degradation.',
-    answerAr:
-      'نقوم بتصميم الأنظمة عبر خدمات مصغرة معيارية، وتخزين مؤقت متعدد الطبقات باستخدام Redis، وحفظ الاتصالات المجمعة، مما يتيح التوسع الأفقي عند زيادة الحمل دون انخفاض في السرعة.',
-    answerTr:
-      'Sistemlerimizi modüler mikroservisler, bağlantı havuzları, çok katmanlı Redis önbellekleme ve durumsuz (stateless) kimlik doğrulama ile tasarlıyoruz; bu sayede sistem yatay olarak kolayca ölçeklenir.',
-  },
-  {
-    id: 4,
-    questionEn: 'What is the typical workflow and delivery timeline for a project?',
-    questionAr: 'ما هي خطوات سير العمل والجدول الزمني المعتاد لتسليم المشاريع؟',
-    questionTr: 'Tipik bir proje iş akışı ve teslimat süresi nedir?',
-    answerEn:
-      'Timelines typically range between 2 to 6 weeks depending on architectural scope. We follow an agile sprint cycle: Discovery & Architecture (Week 1), Core Sprints & Prototyping (Weeks 2-4), and Performance Hardening & Deployment (Weeks 5-6).',
-    answerAr:
-      'تتراوح المخططات الزمنية عادةً بين أسبوعين و6 أسابيع حسب متطلبات المشروع. نتبع دورات عمل مرنة: مرحلة التخطيط والمعمارية (الأسبوع الأول)، ثم البرمجة والاختبار التكراري، وأخيراً تدقيق الأداء والنشر.',
-    answerTr:
-      'Proje kapsamına bağlı olarak teslimat süreleri genellikle 2 ila 6 hafta arasındadır. Şeffaf sprint döngüleri ile keşif, temel geliştirme, test ve güvenli dağıtım aşamalarını sırayla yürütürüz.',
-  },
-  {
-    id: 5,
-    questionEn: 'Do you provide post-launch maintenance and support?',
-    questionAr: 'هل توفرون خدمات الدعم الفني والصيانة بعد إطلاق المشروع؟',
-    questionTr: 'Lansman sonrası bakım ve teknik destek sağlıyor musunuz?',
-    answerEn:
-      'Yes. Every engagement includes a standard 30-day post-launch warranty covering bug fixes, performance monitoring, and server stability audits. Extended maintenance and architecture consulting retainers are also available.',
-    answerAr:
-      'نعم، يشمل كل مشروع فترة ضمان قياسية لمدة 30 يوماً بعد الإطلاق لمعالجة أي ملاحظات ومراقبة استقرار الخادم والأداء، مع توفر عقود دعم واستشارات معمارية ممتدة.',
-    answerTr:
-      'Evet. Her proje, hata düzeltmeleri ve sistem kararlılığı denetimlerini içeren 30 günlük lansman sonrası garanti ile teslim edilir. Uzun vadeli bakım anlaşmaları da sunulmaktadır.',
-  },
-];
-
 const renderServiceIcon = (iconName?: string) => {
   switch (iconName) {
     case 'Code2':
@@ -457,28 +380,22 @@ const getLocalized = (
 };
 
 export const ServicesSection: React.FC = () => {
-  const { language, dir } = usePublicPortfolio();
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const { language } = usePublicPortfolio();
   const [apiServices, setApiServices] = useState<ServiceItem[]>([]);
   const [apiWorkflow, setApiWorkflow] = useState<WorkflowStepItem[]>([]);
-  const [apiFaqs, setApiFaqs] = useState<FaqItem[]>([]);
 
   useEffect(() => {
     let isMounted = true;
     const fetchServicesData = async () => {
       try {
-        const [servicesRes, faqsRes, workflowRes] = await Promise.all([
+        const [servicesRes, workflowRes] = await Promise.all([
           api.get('/services?activeOnly=true').catch(() => ({ data: { data: [] } })),
-          api.get('/faqs?publishedOnly=true').catch(() => ({ data: { data: [] } })),
           api.get('/workflow').catch(() => ({ data: { data: [] } })),
         ]);
 
         if (isMounted) {
           if (Array.isArray(servicesRes.data?.data) && servicesRes.data.data.length > 0) {
             setApiServices(servicesRes.data.data);
-          }
-          if (Array.isArray(faqsRes.data?.data) && faqsRes.data.data.length > 0) {
-            setApiFaqs(faqsRes.data.data);
           }
           if (Array.isArray(workflowRes.data?.data) && workflowRes.data.data.length > 0) {
             setApiWorkflow(workflowRes.data.data);
@@ -503,10 +420,6 @@ export const ServicesSection: React.FC = () => {
     return apiWorkflow.length > 0 ? apiWorkflow : DEFAULT_WORKFLOW;
   }, [apiWorkflow]);
 
-  const faqs: FaqItem[] = useMemo(() => {
-    return apiFaqs.length > 0 ? apiFaqs : DEFAULT_FAQS;
-  }, [apiFaqs]);
-
   const copy = useMemo(() => {
     if (language === 'ar') {
       return {
@@ -516,9 +429,6 @@ export const ServicesSection: React.FC = () => {
         workflowBadge: '// منهجية الإنجاز والعمل',
         workflowTitle: 'من المفهوم المجرد إلى واقع برمجي متكامل',
         workflowLead: 'خارطة طريق واضحة وهندسية تضمن تسليم مشاريع خالية من العيوب وبأعلى معايير الاستقرار.',
-        faqBadge: '// الاستفسارات الشائعة',
-        faqTitle: 'الأسئلة الأكثر تكراراً',
-        faqLead: 'كل ما تحتاج لمعرفته حول ملكية الكود المصدري، والمعايير التقنية، وضمانات ما بعد الإطلاق.',
         deliverablesTitle: 'مخرجات ونطاق العمل:',
         allRights: '100% تسليم كامل وحقوق ملكية حصرية',
       };
@@ -531,9 +441,6 @@ export const ServicesSection: React.FC = () => {
         workflowBadge: '// NASIL ÇALIŞIYORUZ',
         workflowTitle: 'Fikirden Ölçeklenebilir Gerçekliğe',
         workflowLead: 'Hatasız kod tabanı ve zamanında teslimatı garanti eden şeffaf ve çevik mühendislik süreci.',
-        faqBadge: '// SIKÇA SORULAN SORULAR',
-        faqTitle: 'Merak Edilen Sorular ve Yanıtlar',
-        faqLead: 'Kaynak kod mülkiyeti, teknoloji tercihleri ve lansman sonrası garantiler hakkında bilmeniz gerekenler.',
         deliverablesTitle: 'Teslim Edilenler & Kapsam:',
         allRights: '%100 Tam Mülkiyet ve Bağımsız Kod',
       };
@@ -545,17 +452,10 @@ export const ServicesSection: React.FC = () => {
       workflowBadge: '// HOW WE DELIVER',
       workflowTitle: 'From Concept to Scalable Reality',
       workflowLead: 'A transparent, structured execution blueprint engineered for reliability, agility, and on-time production launches.',
-      faqBadge: '// COMMON INQUIRIES',
-      faqTitle: 'Frequently Asked Questions',
-      faqLead: 'Key answers covering code ownership, technology decisions, infrastructure resilience, and post-launch guarantees.',
       deliverablesTitle: 'Deliverables & Scope:',
       allRights: '100% Source Code Ownership & Zero Lock-in',
     };
   }, [language]);
-
-  const toggleFaq = (index: number) => {
-    setOpenFaqIndex((prev) => (prev === index ? null : index));
-  };
 
   return (
     <ScrollRevealSection id="services" className="py-24 px-4 sm:px-8 max-w-6xl mx-auto w-full">
@@ -702,7 +602,7 @@ export const ServicesSection: React.FC = () => {
       </div>
 
       {/* PART 3: TECHNICAL PILLARS & GUARANTEES */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-24">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {TECHNICAL_PILLARS.map((pillar, idx) => {
           const pTitle = language === 'ar' ? pillar.titleAr : language === 'tr' ? pillar.titleTr : pillar.titleEn;
           const pDesc = language === 'ar' ? pillar.descAr : language === 'tr' ? pillar.descTr : pillar.descEn;
@@ -727,82 +627,6 @@ export const ServicesSection: React.FC = () => {
             </div>
           );
         })}
-      </div>
-
-      {/* PART 4: INTEGRATED FAQ ACCORDION */}
-      <div className="max-w-3xl mx-auto space-y-4">
-        {/* FAQ Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-mono font-medium mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{copy.faqBadge}</span>
-          </div>
-          <h3 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight mb-2">
-            {copy.faqTitle}
-          </h3>
-          <p className="text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm max-w-xl mx-auto">
-            {copy.faqLead}
-          </p>
-        </div>
-
-        {/* Accordion Items */}
-        <div className="space-y-3">
-          {faqs.map((faq, index) => {
-            const isOpen = openFaqIndex === index;
-            const question = getLocalized(faq as unknown as Record<string, unknown>, 'question', language, faq.questionEn);
-            const answer = getLocalized(faq as unknown as Record<string, unknown>, 'answer', language, faq.answerEn);
-
-            return (
-              <div
-                key={faq.id || index}
-                className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
-                  isOpen
-                    ? 'border-cyan-500/40 bg-cyan-50/50 dark:bg-zinc-900/80 shadow-[0_0_25px_rgba(6,182,212,0.06)]'
-                    : 'border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/40 hover:border-zinc-300 dark:hover:border-zinc-700/80 shadow-sm dark:shadow-none'
-                }`}
-              >
-                <button
-                  type="button"
-                  onClick={() => toggleFaq(index)}
-                  className={`w-full p-5 sm:p-6 text-start flex items-center justify-between gap-4 select-none ${
-                    dir === 'rtl' ? 'flex-row-reverse' : ''
-                  }`}
-                  aria-expanded={isOpen}
-                >
-                  <span className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-white tracking-tight">
-                    {question}
-                  </span>
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border transition-all duration-300 ${
-                      isOpen
-                        ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 rotate-180'
-                        : 'bg-zinc-100 dark:bg-zinc-800/60 border-zinc-200 dark:border-zinc-700/60 text-zinc-600 dark:text-zinc-400'
-                    }`}
-                  >
-                    <ChevronDown className="w-4 h-4" />
-                  </div>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      key="content"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-5 pb-5 sm:px-6 sm:pb-6 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed border-t border-zinc-200 dark:border-zinc-800/60 pt-4">
-                        {answer}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </ScrollRevealSection>
   );

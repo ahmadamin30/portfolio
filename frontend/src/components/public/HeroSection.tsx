@@ -1,232 +1,216 @@
-﻿import React, { useRef, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { usePublicPortfolio } from '../../context/PublicPortfolioContext';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, useScroll, useTransform, type Variants } from 'framer-motion';
+import { usePublicPortfolio, type PortfolioLanguage } from '../../context/PublicPortfolioContext';
 import { FogBackground } from '@/components/ui/fog-background';
 
-interface MouseState {
-  x: number;
-  y: number;
-  targetX: number;
-  targetY: number;
+interface HeroCopy {
+  name: string;
+  role: string;
+  statement: string;
+  location: string;
 }
 
-const SineWaveCanvas: React.FC<{ isRtl: boolean }> = ({ isRtl }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+const EASE_EDITORIAL: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.18,
+      delayChildren: 0.12,
+    },
+  },
+};
 
-    let animationFrameId: number;
-    let width = (canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1));
-    let height = (canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1));
-
-    const mouse: MouseState = {
-      x: width * 0.5,
-      y: height * 0.5,
-      targetX: width * 0.5,
-      targetY: height * 0.5,
-    };
-
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
-      height = canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.targetX = (e.clientX - rect.left) * (window.devicePixelRatio || 1);
-      mouse.targetY = (e.clientY - rect.top) * (window.devicePixelRatio || 1);
-    };
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('mousemove', handleMouseMove);
-
-    let time = 0;
-    const linesCount = 10;
-
-    const render = () => {
-      time += 0.01;
-      mouse.x += (mouse.targetX - mouse.x) * 0.04;
-      mouse.y += (mouse.targetY - mouse.y) * 0.04;
-
-      ctx.clearRect(0, 0, width, height);
-
-      const dpr = window.devicePixelRatio || 1;
-      const centerY = height * 0.52;
-      const mouseOffsetY = (mouse.y - centerY) * 0.3;
-      const isDark = document.documentElement.classList.contains('dark');
-
-      for (let i = 0; i < linesCount; i++) {
-        const progress = i / (linesCount - 1);
-        const lineOffset = (progress - 0.5) * 220 * dpr;
-
-        ctx.beginPath();
-        const baseAmp = (50 + progress * 50) * dpr;
-        const freq1 = (0.0014 + progress * 0.0005) / dpr;
-        const freq2 = (0.0024 + progress * 0.0007) / dpr;
-        const speed = time * (0.7 + progress * 0.35);
-
-        const grad = ctx.createLinearGradient(0, 0, width, height);
-        const alpha = 0.07 + Math.sin(progress * Math.PI) * 0.10;
-
-        if (isDark) {
-          grad.addColorStop(0, 'rgba(255, 255, 255, 0.01)');
-          grad.addColorStop(0.3, `rgba(14, 165, 233, ${alpha * 0.5})`);
-          grad.addColorStop(0.65, `rgba(255, 255, 255, ${alpha * 0.85})`);
-          grad.addColorStop(1, 'rgba(255, 255, 255, 0.01)');
-        } else {
-          grad.addColorStop(0, 'rgba(15, 23, 42, 0.01)');
-          grad.addColorStop(0.3, `rgba(2, 132, 199, ${alpha * 0.7})`);
-          grad.addColorStop(0.65, `rgba(15, 23, 42, ${alpha * 0.75})`);
-          grad.addColorStop(1, 'rgba(15, 23, 42, 0.01)');
-        }
-
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = (1.1 + progress * 0.6) * dpr;
-
-        const step = 8 * dpr;
-        for (let x = 0; x <= width + step; x += step) {
-          const distToMouse = Math.abs(x - mouse.x);
-          const mouseInfluence =
-            Math.exp(-Math.pow(distToMouse / (280 * dpr), 2)) * mouseOffsetY * 0.75;
-
-          const wave1 = Math.sin(x * freq1 + speed + progress * 2) * baseAmp;
-          const wave2 = Math.cos(x * freq2 - speed * 0.65) * (baseAmp * 0.4);
-          const y = centerY + lineOffset + wave1 + wave2 + mouseInfluence;
-
-          if (x === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
-        }
-        ctx.stroke();
-      }
-
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [isRtl]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="w-full h-full block opacity-[0.20] dark:opacity-[0.14] pointer-events-none transition-opacity duration-300"
-      style={{ touchAction: 'none' }}
-    />
-  );
+const fadeVariants: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 1,
+      ease: EASE_EDITORIAL,
+    },
+  },
 };
 
 export const HeroSection: React.FC = () => {
-  const { language, dir } = usePublicPortfolio();
-  const isRtl = dir === 'rtl';
+  const { language, dir, settings } = usePublicPortfolio();
+  const [currentTime, setCurrentTime] = useState<string>('');
 
-  const copy = useMemo(() => {
+  // Parallax depth transforms as AboutSection slides up to cover the sticky Hero
+  const { scrollY } = useScroll();
+  const heroOpacity = useTransform(scrollY, [0, 650], [1, 0.15]);
+  const heroScale = useTransform(scrollY, [0, 700], [1, 0.95]);
+  const heroY = useTransform(scrollY, [0, 700], [0, -32]);
+
+  // Live real-time clock (e.g. "10:00 PM")
+  useEffect(() => {
+    const updateTime = (): void => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+          timeZone: 'Europe/Istanbul',
+        })
+      );
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const copy = useMemo<HeroCopy>(() => {
+    const getLocalized = (
+      prefix: 'displayName' | 'location' | 'bio',
+      lang: PortfolioLanguage
+    ): string => {
+      if (!settings) return '';
+      const suffix = lang === 'ar' ? 'Ar' : lang === 'tr' ? 'Tr' : 'En';
+      const key = `${prefix}${suffix}` as keyof typeof settings;
+      const value = settings[key];
+      return typeof value === 'string' && value.trim().length > 0 ? value.trim() : '';
+    };
+
+    const customName = getLocalized('displayName', language);
+    const customLocation = getLocalized('location', language);
+
     if (language === 'ar') {
       return {
-        headline: 'CRAFT & CODE',
-        signature: 'أحمد الأمين',
-        intro:
-          'مرحباً بك، أنا أحمد. مهندس حاسوب وبرمجيات، شغوف بتحويل الخوارزميات والمنطق المعقد إلى كود أنيق، أنظمة سحابية قابلة للتوسع، وتجارب رقمية استثنائية. أهلاً بك في مساحتي.',
-        edition: 'ADVAX // 2026 EDITION',
+        name: customName || 'أحمد الأمين',
+        role: 'SOFTWARE ENGINEER | ADVAX',
+        statement:
+          'شغوف بهندسة النظم السحابية القابلة للتوسع، وتحويل المنطق البرمجي المعقد إلى برمجيات فائقة الدقة والأداء وتجارب رقمية ذات أثر عالمي.',
+        location: customLocation || 'إسطنبول، تركيا',
       };
     }
+
     if (language === 'tr') {
       return {
-        headline: 'CRAFT & CODE',
-        signature: 'Ahmad Alamin',
-        intro:
-          'Merhaba, ben Ahmad. Karmaşık mantığı zarif koda, ölçeklenebilir sistemlere ve sezgisel dijital deneyimlere dönüştürme tutkusuna sahip bir yazılım ve bilgisayar mühendisiyim. Dünyama hoş geldiniz.',
-        edition: 'ADVAX // 2026 EDITION',
+        name: customName || 'AHMAD ALAMIN',
+        role: 'SOFTWARE ENGINEER | ADVAX',
+        statement:
+          'ÖLÇEKLENEBİLİR SİSTEMLER VE ZARİF KOD MİMARİSİ TUTKUSUYLA, KARMAŞIK MANTIĞI YÜKSEK HASSASİYETLİ DİJİTAL DENEYİMLERE DÖNÜŞTÜRÜYOR.',
+        location: customLocation || 'İSTANBUL, TR',
       };
     }
+
     return {
-      headline: 'CRAFT & CODE',
-      signature: 'Ahmad Alamin',
-      intro:
-        "Hey there, I'm Ahmad. A software and computer engineer passionate about turning complex logic into elegant code, scalable systems, and intuitive digital experiences. Welcome to my space.",
-      edition: 'ADVAX // 2026 EDITION',
+      name: customName ? customName.toUpperCase() : 'AHMAD ALAMIN',
+      role: 'SOFTWARE ENGINEER | ADVAX',
+      statement:
+        'PASSIONATE ABOUT SCALABLE SYSTEMS ARCHITECTURE, HIGH-CONCURRENCY RUNTIMES, AND TRANSFORMING COMPLEX LOGIC INTO MINIMALIST, HIGH-IMPACT DIGITAL EXPERIENCES.',
+      location: customLocation ? customLocation.toUpperCase() : 'ISTANBUL, TR',
     };
-  }, [language]);
+  }, [language, settings]);
+
+  const year = new Date().getFullYear();
 
   return (
     <section
       id="hero"
-      className="min-h-screen w-full relative flex flex-col justify-between p-8 sm:p-14 lg:p-20 pb-32 sm:pb-36 overflow-hidden bg-transparent text-zinc-900 dark:text-zinc-100 select-none transition-colors duration-300"
+      dir={dir}
+      aria-label="Hero Introduction"
+      className="sticky top-0 z-0 flex flex-col items-center justify-between w-full h-screen overflow-hidden bg-zinc-50 dark:bg-[#09090b] px-6 sm:px-12 lg:px-20 py-16 sm:py-24 text-zinc-900 dark:text-zinc-100 select-none transition-colors duration-300"
     >
-      {/* Fluid Atmospheric Fog & Film Grain Ambient Layer */}
-      <div className="absolute inset-0 z-0 w-full h-full pointer-events-none overflow-hidden">
+      {/* Atmosphere 1: Soft Ambient Fog Canvas */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 z-0 w-full h-full opacity-60 dark:opacity-75 pointer-events-none overflow-hidden"
+      >
         <FogBackground className="w-full h-full" />
       </div>
 
-      {/* Seamless Bottom Gradient Fade into Page Background */}
-      <div className="absolute bottom-0 inset-x-0 h-44 bg-gradient-to-b from-transparent via-zinc-50/60 to-zinc-50 dark:via-[#09090b]/60 dark:to-[#09090b] pointer-events-none z-10" />
-
-      {/* Background Subtle Gradient Glow */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] rounded-full opacity-[0.03] dark:opacity-[0.04] blur-[150px] bg-sky-500" />
-        <div className="absolute bottom-1/4 left-1/4 w-[500px] h-[500px] rounded-full opacity-[0.02] dark:opacity-[0.03] blur-[130px] bg-blue-600" />
-      </div>
-
-      {/* Full-Cover Ambient Sine Wave Canvas Mesh */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
-        <SineWaveCanvas isRtl={isRtl} />
-      </div>
-
-      {/* TOP-LEFT TYPOGRAPHY (Foreground z-10) */}
-      <div className="relative z-10 pt-4 sm:pt-6">
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-3xl"
-        >
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-serif text-zinc-900 dark:text-zinc-100 uppercase tracking-tight font-editorial leading-[0.92] drop-shadow-sm">
-            {copy.headline}
-          </h1>
-        </motion.div>
-      </div>
-
-      {/* BOTTOM-LEFT IDENTITY & WELCOME NOTE (Foreground z-10) */}
-      <div className="relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-lg"
-        >
-          <div className="text-2xl sm:text-3xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight mb-2.5 font-sans">
-            {copy.signature}
-          </div>
-          <div className="border-l rtl:border-l-0 rtl:border-r border-zinc-300 dark:border-zinc-700/80 pl-4 rtl:pl-0 rtl:pr-4 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 font-mono leading-relaxed">
-            <p>{copy.intro}</p>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* FAR-RIGHT VERTICAL ACCENT */}
+      {/* Atmosphere 2: Ambient Center Radial Glows */}
       <div
-        className={`hidden md:flex absolute top-1/2 -translate-y-1/2 ${
-          isRtl ? 'left-6 lg:left-10 right-auto' : 'right-6 lg:right-10 left-auto'
-        } z-20 flex-col items-center gap-3 pointer-events-none select-none`}
+        aria-hidden="true"
+        className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
       >
-        <div className="w-px h-16 bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent" />
-        <span className="[writing-mode:vertical-rl] tracking-[0.3em] text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">
-          {copy.edition}
-        </span>
-        <div className="w-px h-16 bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[750px] sm:h-[750px] rounded-full opacity-[0.035] blur-[160px] bg-sky-500" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] sm:w-[500px] sm:h-[500px] rounded-full opacity-[0.025] blur-[140px] bg-indigo-500" />
       </div>
+
+      {/* Atmosphere 3: Subtle Film Grain Noise Texture */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 z-0 w-full h-full opacity-[0.12] dark:opacity-[0.16] mix-blend-overlay pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='heroNoiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23heroNoiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
+
+      {/* Parallax Foreground Wrapper */}
+      <motion.div
+        style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+        className="relative z-20 flex flex-col items-center justify-between flex-1 w-full"
+      >
+        {/* Top Spacer for true vertical centering */}
+        <div className="w-full h-4 sm:h-8" aria-hidden="true" />
+
+        {/* CENTERPIECE: Editorial Horizontal Single Line [NAME — LINE — ROLE] */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col md:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-8 my-auto w-full max-w-5xl px-4 text-center"
+        >
+          {/* Name */}
+          <motion.span
+            variants={fadeVariants}
+            className="text-xs sm:text-[13px] md:text-sm font-mono uppercase tracking-[0.28em] sm:tracking-[0.32em] text-zinc-900 dark:text-zinc-100 whitespace-nowrap font-medium"
+          >
+            {copy.name}
+          </motion.span>
+
+          {/* Thin Minimal Center Divider Line */}
+          <motion.span
+            variants={fadeVariants}
+            aria-hidden="true"
+            className="hidden md:block h-[1px] w-24 bg-zinc-900/30 dark:bg-white/20 shrink-0"
+          />
+
+          {/* Small Horizontal Pip for Mobile */}
+          <motion.span
+            variants={fadeVariants}
+            aria-hidden="true"
+            className="block md:hidden h-[1px] w-12 bg-zinc-900/30 dark:bg-white/20"
+          />
+
+          {/* Role & Brand */}
+          <motion.span
+            variants={fadeVariants}
+            className="text-xs sm:text-[13px] md:text-sm font-mono uppercase tracking-[0.24em] sm:tracking-[0.28em] text-zinc-600 dark:text-zinc-400 whitespace-nowrap"
+          >
+            {copy.role}
+          </motion.span>
+        </motion.div>
+
+        {/* BOTTOM FOOTER: Hyper-Minimal Paragraph + Live Clock & Location */}
+        <motion.div
+          variants={fadeVariants}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col items-center text-center max-w-xl mx-auto space-y-4 px-4 pt-10"
+        >
+          {/* Multi-line statement */}
+          <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.20em] sm:tracking-[0.22em] leading-relaxed text-zinc-600 dark:text-zinc-400 max-w-lg">
+            {copy.statement}
+          </p>
+
+          {/* Copyright, Location & Live Time */}
+          <div className="flex flex-wrap items-center justify-center gap-2 text-[10px] font-mono uppercase tracking-[0.24em] text-zinc-500 dark:text-zinc-500">
+            <span>&copy;{year}</span>
+            <span className="opacity-40">•</span>
+            <span>{copy.location}</span>
+            <span className="opacity-40">•</span>
+            <span className="tabular-nums font-semibold text-zinc-900 dark:text-zinc-300">{currentTime || '10:00 PM'}</span>
+          </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

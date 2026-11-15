@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { Moon, Sun } from "lucide-react";
@@ -49,10 +49,6 @@ const STARS = [
   { x: 14, y: 72, r: 1.2, t: 2500 },
 ];
 const SKY_EASING = "cubic-bezier(0.65, 0, 0.35, 1)";
-const PAGE_FADE_STYLE_ID = "sun-moon-theme-fade";
-const PAGE_FADE_PROPERTIES = "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke";
-
-let pageFadeCleanup = 0;
 
 // Both bodies ride one circle centered below the button, like a sky dome:
 // angle 0 is the middle of the button, a quarter turn is past the lower corner.
@@ -116,15 +112,7 @@ function readDocumentTheme(): SunMoonTheme {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
-function applyDocumentTheme(theme: SunMoonTheme, duration: number) {
-  if (duration > 0 && !prefersReducedMotion()) {
-    const style =
-      document.getElementById(PAGE_FADE_STYLE_ID) ??
-      document.head.appendChild(Object.assign(document.createElement("style"), { id: PAGE_FADE_STYLE_ID }));
-    style.textContent = `*, *::before, *::after { transition-property: ${PAGE_FADE_PROPERTIES} !important; transition-duration: ${duration}ms !important; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1) !important; transition-delay: 0s !important; }`;
-    window.clearTimeout(pageFadeCleanup);
-    pageFadeCleanup = window.setTimeout(() => style.remove(), duration + 100);
-  }
+function applyDocumentTheme(theme: SunMoonTheme) {
   document.documentElement.classList.toggle("dark", theme === "dark");
 }
 
@@ -180,7 +168,7 @@ export function SunMoonThemeToggle({
   onThemeChange,
   syncDocument = true,
   storageKey,
-  duration = 1740,
+  duration = 500,
   size = 40,
   classNames,
   sky = true,
@@ -259,7 +247,7 @@ export function SunMoonThemeToggle({
     const next: SunMoonTheme = theme === "dark" ? "light" : "dark";
     if (!isControlled) setInternalTheme(next);
     if (storageKey) window.localStorage.setItem(storageKey, next);
-    if (syncDocument) applyDocumentTheme(next, duration);
+    if (syncDocument) applyDocumentTheme(next);
     onThemeChange?.(next);
   };
 

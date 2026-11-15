@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface FogBackgroundProps {
@@ -39,25 +39,28 @@ export const FogBackground: React.FC<FogBackgroundProps> = ({ className, childre
     }));
 
     let time = 0;
+    let themeProgress = document.documentElement.classList.contains("dark") ? 1 : 0;
+
+    const lerpColor = (c1: [number, number, number], c2: [number, number, number], t: number) => {
+      const r = Math.round(c1[0] + (c2[0] - c1[0]) * t);
+      const g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
+      const b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
+      return `rgb(${r}, ${g}, ${b})`;
+    };
+
     const render = () => {
       time += 0.003;
 
-      const isDark = document.documentElement.classList.contains("dark");
+      const targetTheme = document.documentElement.classList.contains("dark") ? 1 : 0;
+      themeProgress += (targetTheme - themeProgress) * 0.08;
 
-      // 1. Layered Base Atmospheric Gradient - soft, eye-friendly, moody
+      // 1. Layered Base Atmospheric Gradient - smoothly interpolated
       const baseGrad = ctx.createLinearGradient(0, height, 0, 0);
-      if (isDark) {
-        // Deep ambient moody blues that melt into page background #09090b
-        baseGrad.addColorStop(0, "#09090b");
-        baseGrad.addColorStop(0.35, "#030712");
-        baseGrad.addColorStop(0.7, "#08203e");
-        baseGrad.addColorStop(1, "#0a3055");
-      } else {
-        baseGrad.addColorStop(0, "#fafafa");
-        baseGrad.addColorStop(0.4, "#f1f5f9");
-        baseGrad.addColorStop(0.75, "#e2e8f0");
-        baseGrad.addColorStop(1, "#e0f2fe");
-      }
+      baseGrad.addColorStop(0, lerpColor([250, 250, 250], [9, 9, 11], themeProgress));
+      baseGrad.addColorStop(0.35, lerpColor([241, 245, 249], [3, 7, 18], themeProgress));
+      baseGrad.addColorStop(0.7, lerpColor([226, 232, 240], [8, 32, 62], themeProgress));
+      baseGrad.addColorStop(1, lerpColor([224, 242, 254], [10, 48, 85], themeProgress));
+
       ctx.fillStyle = baseGrad;
       ctx.fillRect(0, 0, width, height);
 
@@ -79,15 +82,13 @@ export const FogBackground: React.FC<FogBackgroundProps> = ({ className, childre
           cloud.y,
           cloud.radius
         );
-        if (isDark) {
-          radial.addColorStop(0, `hsla(${cloud.hue}, 65%, 45%, ${cloud.alpha})`);
-          radial.addColorStop(0.5, `hsla(${cloud.hue + 10}, 60%, 30%, ${cloud.alpha * 0.4})`);
-          radial.addColorStop(1, "rgba(9, 9, 11, 0)");
-        } else {
-          radial.addColorStop(0, `hsla(${cloud.hue}, 60%, 65%, ${cloud.alpha * 0.5})`);
-          radial.addColorStop(0.5, `hsla(${cloud.hue + 10}, 50%, 75%, ${cloud.alpha * 0.2})`);
-          radial.addColorStop(1, "rgba(250, 250, 250, 0)");
-        }
+
+        const currentLightness = Math.round(65 - themeProgress * 20);
+        const currentAlpha = cloud.alpha * (0.65 + 0.35 * themeProgress);
+
+        radial.addColorStop(0, `hsla(${cloud.hue}, 65%, ${currentLightness}%, ${currentAlpha})`);
+        radial.addColorStop(0.5, `hsla(${cloud.hue + 10}, 55%, ${currentLightness - 10}%, ${currentAlpha * 0.35})`);
+        radial.addColorStop(1, "rgba(0, 0, 0, 0)");
 
         ctx.fillStyle = radial;
         ctx.beginPath();
