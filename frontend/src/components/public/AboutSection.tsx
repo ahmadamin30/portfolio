@@ -1,75 +1,272 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { motion, useScroll, useTransform, type Variants } from 'framer-motion';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
-  Terminal,
-  Cpu,
-  Sparkles,
-  FileDown,
-  ArrowUpRight,
-  type LucideIcon,
-} from 'lucide-react';
-import {
-  usePublicPortfolio,
-  type PortfolioLanguage,
-} from '../../context/PublicPortfolioContext';
-
-interface FeatureHighlight {
-  id: string;
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  iconColorClass: string;
-}
-
-interface SectionCopyItem {
-  badgeAr?: string;
-  badgeEn?: string;
-  badgeTr?: string;
-  titleAr?: string;
-  titleEn?: string;
-  titleTr?: string;
-  subtitleAr?: string;
-  subtitleEn?: string;
-  subtitleTr?: string;
-}
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  useReducedMotion,
+  type MotionValue,
+} from 'framer-motion';
+import { usePublicPortfolio } from '../../context/PublicPortfolioContext';
 
 const DEFAULT_PORTRAIT = '/ahmad-alamin.jpg';
 const EASE_EDITORIAL: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const staggerContainerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.06,
-    },
-  },
+interface ScrollHighlightWordProps {
+  word: string;
+  progress: MotionValue<number>;
+  range: [number, number];
+}
+
+const ScrollHighlightWord: React.FC<ScrollHighlightWordProps> = ({
+  word,
+  progress,
+  range,
+}) => {
+  const opacity = useTransform(progress, range, [0, 1]);
+
+  return (
+    <span className="relative inline-block">
+      {/* Base muted layer (readable text for selection & assistive tech) */}
+      <span className="text-zinc-400/75 dark:text-[#52525B]">{word}</span>
+      {/* Scroll-driven crisp highlight overlay */}
+      <motion.span
+        aria-hidden="true"
+        style={{ opacity }}
+        className="absolute inset-0 text-zinc-900 dark:text-[#F4F4F5] pointer-events-none select-none will-change-[opacity]"
+      >
+        {word}
+      </motion.span>
+    </span>
+  );
 };
 
-const lineRevealVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.85,
-      ease: EASE_EDITORIAL,
-    },
-  },
+interface ScrollRevealParagraphProps {
+  text: string;
+  dir: 'ltr' | 'rtl';
+}
+
+const ScrollRevealParagraph: React.FC<ScrollRevealParagraphProps> = ({ text, dir }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start 0.85', 'end 0.42'],
+  });
+
+  const words = useMemo(() => text.trim().split(/\s+/), [text]);
+
+  const paragraphClassName =
+    'max-w-3xl mx-auto text-start font-sans text-xl sm:text-2xl md:text-[1.75rem] lg:text-[1.95rem] font-medium leading-[1.48] sm:leading-[1.45] tracking-[-0.02em] rtl:tracking-normal rtl:leading-[1.68]';
+
+  if (prefersReducedMotion) {
+    return (
+      <div ref={containerRef} className="mt-28 sm:mt-36 lg:mt-44 pt-4 pb-8 sm:pb-12">
+        <p
+          dir={dir}
+          className={`${paragraphClassName} text-zinc-900 dark:text-[#F4F4F5]`}
+        >
+          {text}
+        </p>
+      </div>
+    );
+  }
+
+  const totalWords = Math.max(words.length, 1);
+  const windowSize = 0.14;
+
+  return (
+    <div ref={containerRef} className="mt-28 sm:mt-36 lg:mt-44 pt-4 pb-8 sm:pb-12">
+      <p dir={dir} className={paragraphClassName}>
+        {words.map((word, index) => {
+          const start = (index / totalWords) * (1 - windowSize);
+          const end = Math.min(1, start + windowSize);
+
+          return (
+            <React.Fragment key={`${index}-${word}`}>
+              <ScrollHighlightWord
+                word={word}
+                progress={scrollYProgress}
+                range={[start, end]}
+              />
+              {index < words.length - 1 ? ' ' : null}
+            </React.Fragment>
+          );
+        })}
+      </p>
+    </div>
+  );
+};
+
+interface TimelineMilestone {
+  id: string;
+  year?: string;
+  title: string;
+  meta: string;
+  description: string;
+}
+
+interface TimelineMilestoneRowProps {
+  milestone: TimelineMilestone;
+  prefersReducedMotion: boolean | null;
+}
+
+const TimelineMilestoneRow: React.FC<TimelineMilestoneRowProps> = ({
+  milestone,
+  prefersReducedMotion,
+}) => {
+  const rowRef = useRef<HTMLLIElement | null>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: rowRef,
+    offset: ['start 0.86', 'center 0.52', 'end 0.18'],
+  });
+
+  // Smooth focus curve: subtly muted ahead -> crisp illuminated active focus -> calm settled state
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.4, 0.68, 1], [0.32, 1, 1, 0.62]);
+  const nodeScale = useTransform(scrollYProgress, [0, 0.4, 0.68, 1], [0.72, 1.15, 1.05, 0.9]);
+  const nodeGlowOpacity = useTransform(scrollYProgress, [0, 0.4, 0.68, 1], [0, 1, 0.85, 0.25]);
+
+  return (
+    <li ref={rowRef} className="relative ps-11 sm:ps-16">
+      {/* Scaled Circular Node Indicator (14px core inside 22px ring, centered on 2px track) */}
+      <span
+        aria-hidden="true"
+        className="absolute start-0 top-[0.32rem] sm:top-[0.42rem] flex items-center justify-center w-[22px] h-[22px] rounded-full bg-zinc-50 dark:bg-[#09090b] border border-zinc-300 dark:border-white/[0.16] z-10"
+      >
+        {/* Subtle Ambient Halo on Active Focus */}
+        <motion.span
+          style={prefersReducedMotion ? { opacity: 0.45 } : { opacity: nodeGlowOpacity }}
+          className="absolute -inset-2 rounded-full bg-zinc-900/12 dark:bg-sky-200/20 blur-[5px] pointer-events-none"
+        />
+        {/* Active Ring Highlight */}
+        <motion.span
+          style={prefersReducedMotion ? { opacity: 0.65 } : { opacity: nodeGlowOpacity }}
+          className="absolute inset-0 rounded-full border-2 border-zinc-900/50 dark:border-[#F4F4F5]/65 pointer-events-none"
+        />
+        {/* 12px–14px Inner Core Dot */}
+        <motion.span
+          style={
+            prefersReducedMotion
+              ? { scale: 1, opacity: 1 }
+              : { scale: nodeScale, opacity: contentOpacity }
+          }
+          className="w-3 h-3 rounded-full bg-zinc-900 dark:bg-[#F4F4F5] dark:shadow-[0_0_12px_rgba(244,244,245,0.55)] will-change-transform"
+        />
+      </span>
+
+      {/* Spacious Editorial Milestone Entry */}
+      <motion.div
+        style={prefersReducedMotion ? undefined : { opacity: contentOpacity }}
+        className="text-start space-y-2.5 sm:space-y-3 will-change-[opacity]"
+      >
+        <h3 className="font-sans text-xl sm:text-2xl lg:text-[1.625rem] font-medium leading-[1.3] tracking-[-0.02em] rtl:tracking-normal text-zinc-900 dark:text-[#F5F5F7]">
+          {milestone.year && (
+            <>
+              <span className="font-mono text-lg sm:text-xl font-normal tracking-normal tabular-nums text-zinc-500 dark:text-[#A1A1AA]">
+                {milestone.year}
+              </span>
+              <span className="mx-2.5 text-zinc-400 dark:text-zinc-600 font-light">—</span>
+            </>
+          )}
+          <span>{milestone.title}</span>
+        </h3>
+
+        <p className="font-sans text-base font-normal tracking-[-0.005em] rtl:tracking-normal text-zinc-500 dark:text-[#A1A1AA]">
+          {milestone.meta}
+        </p>
+
+        <p className="pt-1 max-w-3xl font-sans text-base sm:text-lg leading-relaxed rtl:leading-[1.85] text-zinc-600 dark:text-zinc-400">
+          {milestone.description}
+        </p>
+      </motion.div>
+    </li>
+  );
+};
+
+interface JourneyTimelineProps {
+  heading: string;
+  milestones: TimelineMilestone[];
+  dir: 'ltr' | 'rtl';
+}
+
+const JourneyTimeline: React.FC<JourneyTimelineProps> = ({
+  heading,
+  milestones,
+  dir,
+}) => {
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  const { scrollYProgress } = useScroll({
+    target: listRef,
+    offset: ['start 0.72', 'end 0.56'],
+  });
+
+  const smoothLineScale = useSpring(scrollYProgress, {
+    stiffness: 150,
+    damping: 30,
+    restDelta: 0.001,
+  });
+
+  return (
+    <div dir={dir} className="mt-32 sm:mt-40 lg:mt-48 py-8 sm:py-12 max-w-4xl lg:max-w-5xl mx-auto">
+      {/* Bold Editorial Section Heading */}
+      <motion.h2
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.35 }}
+        transition={{ duration: 0.85, ease: EASE_EDITORIAL }}
+        className="mb-16 sm:mb-20 text-start font-sans text-3xl sm:text-4xl lg:text-[2.6rem] font-semibold tracking-[-0.025em] rtl:tracking-normal text-zinc-900 dark:text-[#F5F5F7]"
+      >
+        {heading}
+      </motion.h2>
+
+      {/* Vertical 2px Axis + Spacious Milestones */}
+      <div ref={listRef} className="relative">
+        {/* Static Subtle 2px Track (Centered under 22px node at start-[10px]) */}
+        <div
+          aria-hidden="true"
+          className="absolute top-3 bottom-3 start-[10px] w-[2px] rounded-full bg-zinc-300/80 dark:bg-white/[0.08]"
+        />
+
+        {/* Scroll-Linked Illuminated 2px Accent Line */}
+        <motion.div
+          aria-hidden="true"
+          style={
+            prefersReducedMotion
+              ? { scaleY: 1 }
+              : { scaleY: smoothLineScale }
+          }
+          className="absolute top-3 bottom-3 start-[10px] w-[2px] rounded-full origin-top bg-gradient-to-b from-zinc-900 via-zinc-700 to-zinc-900 dark:from-[#F4F4F5]/95 dark:via-sky-200/70 dark:to-[#F4F4F5]/95 will-change-transform"
+        />
+
+        <ol className="relative space-y-14 sm:space-y-16 lg:space-y-20">
+          {milestones.map((milestone) => (
+            <TimelineMilestoneRow
+              key={milestone.id}
+              milestone={milestone}
+              prefersReducedMotion={prefersReducedMotion}
+            />
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
 };
 
 export const AboutSection: React.FC = () => {
-  const { language, dir, t, settings } = usePublicPortfolio();
-  const isRtl = dir === 'rtl';
+  const { dir, t, settings } = usePublicPortfolio();
   const sectionRef = useRef<HTMLElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
-  // Subtle internal parallax as AboutSection slides up over the sticky Hero
+  // Subtle vertical drift on the portrait as the section scrolls through the viewport
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'end start'],
   });
-  const portraitParallaxY = useTransform(scrollYProgress, [0, 1], [28, -28]);
+  const portraitParallaxY = useTransform(scrollYProgress, [0, 1], [18, -18]);
 
   const [imgSrc, setImgSrc] = useState<string>(() => {
     return settings?.avatarUrl || settings?.profilePhotoUrl || DEFAULT_PORTRAIT;
@@ -82,277 +279,148 @@ export const AboutSection: React.FC = () => {
     }
   }, [settings?.avatarUrl, settings?.profilePhotoUrl]);
 
-  const copy = useMemo(() => {
-    const langSuffix: 'Ar' | 'Tr' | 'En' =
-      language === 'ar' ? 'Ar' : language === 'tr' ? 'Tr' : 'En';
+  const statementLead = t('about.statementLead');
+  const statementRole = t('about.statementRole');
+  const editorialBody = t('about.editorialBody');
+  const timelineHeading = t('about.timeline.heading');
 
-    const getTopLevelField = (prefix: string, lang: PortfolioLanguage): string => {
-      if (!settings) return '';
-      const suffix = lang === 'ar' ? 'Ar' : lang === 'tr' ? 'Tr' : 'En';
-      const key = `${prefix}${suffix}` as keyof typeof settings;
-      const value = settings[key];
-      if (typeof value === 'string' && value.trim().length > 0) {
-        return value.trim();
-      }
-      const fallbackKey = `${prefix}En` as keyof typeof settings;
-      const fallbackValue = settings[fallbackKey];
-      return typeof fallbackValue === 'string' && fallbackValue.trim().length > 0
-        ? fallbackValue.trim()
-        : '';
-    };
-
-    const rawCopywriting = settings?.sectionCopywriting;
-    const aboutCopywriting: SectionCopyItem | undefined =
-      rawCopywriting && typeof rawCopywriting === 'object' && 'about' in rawCopywriting
-        ? (rawCopywriting.about as SectionCopyItem)
-        : undefined;
-
-    const sectionBadge =
-      aboutCopywriting?.[`badge${langSuffix}`]?.trim() ||
-      getTopLevelField('aboutBadge', language) ||
-      t('about.badge');
-
-    const heading =
-      aboutCopywriting?.[`title${langSuffix}`]?.trim() ||
-      getTopLevelField('aboutHeadline', language) ||
-      t('about.heading');
-
-    const paragraph1 =
-      getTopLevelField('aboutText', language) ||
-      aboutCopywriting?.[`subtitle${langSuffix}`]?.trim() ||
-      t('about.p1');
-
-    const paragraph2 = getTopLevelField('aboutParagraph2', language) || t('about.p2');
-    const roleBadge = getTopLevelField('jobTitle', language) || t('about.roleBadge');
-
-    // Split paragraph1 into sentence lines for line-by-line scroll reveal
-    const sentenceLines = paragraph1
-      .split(/(?<=[.!?؟])\s+/)
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
-
-    return {
-      sectionBadge,
-      heading,
-      sentenceLines: sentenceLines.length > 0 ? sentenceLines : [paragraph1],
-      paragraph2,
-      roleBadge,
-    };
-  }, [language, settings, t]);
-
-  const features = useMemo<FeatureHighlight[]>(
+  const milestones = useMemo<TimelineMilestone[]>(
     () => [
       {
-        id: 'architecture',
-        icon: Terminal,
-        title: t('about.feat.arch'),
-        description: t('about.feat.archDesc'),
-        iconColorClass: 'text-sky-600 dark:text-sky-400',
+        id: 'biruni-2023',
+        year: '2023',
+        title: t('about.timeline.m1.title'),
+        meta: t('about.timeline.m1.meta'),
+        description: t('about.timeline.m1.desc'),
       },
       {
-        id: 'performance',
-        icon: Cpu,
-        title: t('about.feat.perf'),
-        description: t('about.feat.perfDesc'),
-        iconColorClass: 'text-indigo-600 dark:text-indigo-400',
+        id: 'freelance-frontend',
+        year: '2024',
+        title: t('about.timeline.m2.title'),
+        meta: t('about.timeline.m2.meta'),
+        description: t('about.timeline.m2.desc'),
       },
       {
-        id: 'precision',
-        icon: Sparkles,
-        title: t('about.feat.prec'),
-        description: t('about.feat.precDesc'),
-        iconColorClass: 'text-emerald-600 dark:text-emerald-400',
+        id: 'vecmenu-2025',
+        year: '2025',
+        title: t('about.timeline.m3.title'),
+        meta: t('about.timeline.m3.meta'),
+        description: t('about.timeline.m3.desc'),
+      },
+      {
+        id: 'enterprise-crm-2025',
+        year: '2025',
+        title: t('about.timeline.m4.title'),
+        meta: t('about.timeline.m4.meta'),
+        description: t('about.timeline.m4.desc'),
+      },
+      {
+        id: 'scramblebit-intern',
+        year: '2026',
+        title: t('about.timeline.m5.title'),
+        meta: t('about.timeline.m5.meta'),
+        description: t('about.timeline.m5.desc'),
       },
     ],
     [t]
   );
-
-  const handleScrollToContact = (): void => {
-    const contactEl = document.querySelector('#contact');
-    if (contactEl) {
-      contactEl.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const resumeHref = settings?.resumeUrl || '/cv.pdf';
-  const isCustomResume = Boolean(settings?.resumeUrl);
 
   return (
     <section
       ref={sectionRef}
       id="about"
       dir={dir}
-      aria-labelledby="about-heading"
-      className="relative z-10 w-full py-28 sm:py-36 lg:py-44 px-6 sm:px-12 lg:px-20 overflow-hidden rounded-t-[2rem] sm:rounded-t-[3rem] bg-[#f4f4f4] dark:bg-[#121215] text-zinc-900 dark:text-zinc-100 border-t border-zinc-300/80 dark:border-white/10 shadow-[0_-32px_90px_rgba(0,0,0,0.85)] transition-colors duration-300"
+      aria-label={t('nav.about')}
+      className="relative z-10 w-full py-32 sm:py-44 lg:py-52 px-6 sm:px-12 lg:px-20 overflow-hidden bg-zinc-50 dark:bg-[#09090b] text-zinc-900 dark:text-[#F5F5F7] transition-colors duration-300"
     >
-      {/* Top Minimal Drag-Bar / Editorial Sheet Indicator */}
+      {/* Seamless Top Edge Feather */}
       <div
         aria-hidden="true"
-        className="absolute top-5 left-1/2 -translate-x-1/2 w-12 h-[2px] rounded-full bg-zinc-400/50 dark:bg-zinc-700/70 pointer-events-none"
+        className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/[0.03] dark:from-black/45 to-transparent pointer-events-none"
       />
 
-      {/* Ambient Radial Glows */}
-      <div aria-hidden="true" className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 start-1/4 w-[500px] h-[500px] rounded-full opacity-[0.04] dark:opacity-[0.045] blur-[150px] bg-sky-500" />
-        <div className="absolute bottom-1/4 end-1/4 w-[440px] h-[440px] rounded-full opacity-[0.03] dark:opacity-[0.035] blur-[140px] bg-indigo-500" />
-      </div>
-
-      {/* Subtle SVG Film Grain Overlay */}
+      {/* Whisper-Soft Ambient Atmosphere */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 z-0 w-full h-full opacity-[0.14] dark:opacity-[0.18] mix-blend-overlay pointer-events-none"
+        className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
+      >
+        <div
+          className="absolute inset-0 opacity-60 dark:opacity-100"
+          style={{
+            background:
+              'radial-gradient(ellipse 70% 55% at 50% 45%, rgba(148, 163, 184, 0.035), transparent 72%)',
+          }}
+        />
+      </div>
+
+      {/* Ultra-Subtle Editorial Film Grain */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 z-0 w-full h-full opacity-[0.06] dark:opacity-[0.09] mix-blend-overlay pointer-events-none"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='aboutNoiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23aboutNoiseFilter)'/%3E%3C/svg%3E")`,
         }}
       />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Portrait Column with Subtle Scroll Parallax */}
+        {/* Upper Split Block: Portrait + Primary Identity Statement */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-14 sm:gap-16 lg:gap-20 xl:gap-24 items-center">
+          {/* Portrait Column (Start: Left in LTR, Right in RTL) */}
           <motion.div
-            initial={{ opacity: 0, y: 24, x: isRtl ? 16 : -16 }}
-            whileInView={{ opacity: 1, y: 0, x: 0 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2, margin: '-40px' }}
-            transition={{ duration: 0.9, ease: EASE_EDITORIAL }}
-            className="lg:col-span-5 relative group"
+            transition={{ duration: 0.95, ease: EASE_EDITORIAL }}
+            className="lg:col-span-5"
           >
-            <div
-              aria-hidden="true"
-              className="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-sky-500/15 via-blue-600/10 to-transparent blur-2xl opacity-50 dark:opacity-70 group-hover:opacity-90 transition-opacity duration-700 pointer-events-none"
-            />
-
             <motion.div
-              style={{ y: portraitParallaxY }}
-              className="relative overflow-hidden rounded-2xl bg-zinc-200/80 dark:bg-zinc-900/60 border border-zinc-300/80 dark:border-zinc-800/80 shadow-xl dark:shadow-2xl backdrop-blur-sm"
+              style={prefersReducedMotion ? undefined : { y: portraitParallaxY }}
+              className="relative overflow-hidden rounded-2xl bg-zinc-200/50 dark:bg-zinc-900/40 border border-zinc-900/[0.08] dark:border-white/[0.07] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.18)] dark:shadow-[0_32px_90px_-24px_rgba(0,0,0,0.9)]"
             >
               <img
                 src={imgSrc}
                 onError={() => setImgSrc(DEFAULT_PORTRAIT)}
-                alt="Ahmad Alamin - Computer Engineer"
+                alt="Ahmad Alamin"
                 loading="lazy"
-                className="w-full h-[380px] sm:h-[460px] lg:h-[510px] object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                className="w-full h-[380px] sm:h-[460px] lg:h-[520px] object-cover object-center transition-transform duration-1000 ease-out hover:scale-[1.02]"
               />
 
+              {/* Soft Edge Vignette for Natural Dark Canvas Integration */}
               <div
                 aria-hidden="true"
-                className="absolute inset-0 bg-gradient-to-t from-zinc-950/85 via-zinc-950/15 to-transparent pointer-events-none"
+                className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10 dark:from-[#09090b]/55 dark:via-transparent dark:to-[#09090b]/15 pointer-events-none"
               />
-
-              {/* Glassmorphic Role Badge */}
-              <div className="absolute bottom-4 inset-x-4 sm:inset-x-auto sm:start-4 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800/80 backdrop-blur-md shadow-xl pointer-events-none">
-                <span className="relative flex w-2 h-2 shrink-0">
-                  <span className="absolute inline-flex w-full h-full rounded-full bg-sky-400 opacity-75 animate-ping" />
-                  <span className="relative inline-flex w-2 h-2 rounded-full bg-sky-500 shadow-[0_0_8px_#0ea5e9]" />
-                </span>
-                <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-zinc-200 truncate">
-                  {copy.roleBadge}
-                </span>
-              </div>
             </motion.div>
           </motion.div>
 
-          {/* Editorial Narrative Column with Staggered Line-by-Line whileInView Reveals */}
+          {/* Primary Statement Column (End: Right in LTR, Left in RTL) */}
           <motion.div
-            variants={staggerContainerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2, margin: '-40px' }}
-            className="lg:col-span-7 flex flex-col items-start text-start space-y-7"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.25, margin: '-40px' }}
+            transition={{ duration: 0.95, delay: 0.1, ease: EASE_EDITORIAL }}
+            className="lg:col-span-7 flex items-center justify-start"
           >
-            {/* Line 1: Minimal Monospace Index & Badge */}
-            <motion.div
-              variants={lineRevealVariants}
-              className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-900/[0.04] dark:bg-white/[0.04] border border-zinc-300/80 dark:border-zinc-800/80 backdrop-blur-sm text-[11px] font-mono uppercase tracking-[0.22em] text-zinc-600 dark:text-zinc-400"
-            >
-              <Terminal className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
-              <span>01 // {copy.sectionBadge.replace(/^\/\/\s*/, '')}</span>
-            </motion.div>
-
-            {/* Line 2: Massive, Elegant Serif Display Heading */}
-            <motion.h2
-              id="about-heading"
-              variants={lineRevealVariants}
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.15rem] font-serif font-editorial font-normal tracking-tight leading-[1.06] text-zinc-900 dark:text-zinc-100"
-            >
-              {copy.heading}
-            </motion.h2>
-
-            {/* Lines 3+: Smaller Editorial Descriptions Revealed Line-by-Line */}
-            <div className="space-y-3.5 max-w-2xl">
-              {copy.sentenceLines.map((line, index) => (
-                <motion.p
-                  key={index}
-                  variants={lineRevealVariants}
-                  className="text-xs sm:text-sm md:text-[15px] font-sans leading-relaxed text-zinc-600 dark:text-zinc-400"
-                >
-                  {line}
-                </motion.p>
-              ))}
-
-              {copy.paragraph2 && (
-                <motion.p
-                  variants={lineRevealVariants}
-                  className="text-xs sm:text-sm font-mono uppercase tracking-[0.14em] leading-relaxed text-zinc-500 dark:text-zinc-400 pt-1"
-                >
-                  {copy.paragraph2}
-                </motion.p>
-              )}
-            </div>
-
-            {/* Line 4: 3-Card Glassmorphic Engineering Pillars */}
-            <motion.div
-              variants={staggerContainerVariants}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 w-full pt-2"
-            >
-              {features.map((feature) => {
-                const IconComponent = feature.icon;
-                return (
-                  <motion.div
-                    key={feature.id}
-                    variants={lineRevealVariants}
-                    className="group flex flex-col gap-1.5 p-4 rounded-2xl bg-white/75 dark:bg-zinc-900/45 border border-zinc-300/70 dark:border-zinc-800/80 hover:border-zinc-400 dark:hover:border-zinc-700/80 backdrop-blur-md shadow-sm dark:shadow-none transition-colors duration-300 text-start"
-                  >
-                    <div className={`flex items-center gap-2 ${feature.iconColorClass}`}>
-                      <IconComponent className="w-3.5 h-3.5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
-                      <span className="text-[11px] font-mono font-semibold uppercase tracking-[0.16em] text-zinc-800 dark:text-zinc-200">
-                        {feature.title}
-                      </span>
-                    </div>
-                    <span className="text-xs leading-snug text-zinc-500 dark:text-zinc-400">
-                      {feature.description}
-                    </span>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-
-            {/* Line 5: Editorial Action Buttons */}
-            <motion.div
-              variants={lineRevealVariants}
-              className="flex flex-wrap items-center gap-4 pt-2"
-            >
-              <button
-                type="button"
-                onClick={handleScrollToContact}
-                className="group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 text-xs font-mono uppercase tracking-[0.18em] shadow-md transition-all duration-300 active:scale-[0.98] cursor-pointer"
-              >
-                <span>{t('about.cta.connect')}</span>
-                <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5" />
-              </button>
-
-              <a
-                href={resumeHref}
-                target={isCustomResume ? '_blank' : undefined}
-                rel={isCustomResume ? 'noopener noreferrer' : undefined}
-                download={!isCustomResume ? 'Ahmad_Alamin_CV.pdf' : undefined}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/70 hover:bg-white dark:bg-zinc-900/60 dark:hover:bg-zinc-800/80 border border-zinc-300/80 dark:border-zinc-800 backdrop-blur-sm text-zinc-800 dark:text-zinc-300 text-xs font-mono uppercase tracking-[0.18em] transition-all duration-300 active:scale-[0.98] cursor-pointer"
-              >
-                <FileDown className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400 shrink-0" />
-                <span>{t('about.cta.resume')}</span>
-              </a>
-            </motion.div>
+            <p className="max-w-xl text-start font-sans text-2xl sm:text-3xl md:text-[2.15rem] lg:text-[2.45rem] font-normal leading-[1.38] sm:leading-[1.34] tracking-[-0.025em] rtl:tracking-normal rtl:leading-[1.55]">
+              <span className="font-medium text-zinc-900 dark:text-[#F5F5F7]">
+                {statementLead}
+              </span>
+              <span className="text-zinc-500 dark:text-[#A1A1AA]">
+                {statementRole}
+              </span>
+            </p>
           </motion.div>
         </div>
+
+        {/* Lower Editorial Block: Prominent Scroll-Linked Highlight Paragraph */}
+        <ScrollRevealParagraph text={editorialBody} dir={dir} />
+
+        {/* Expanded Vertical Journey Timeline */}
+        <JourneyTimeline
+          heading={timelineHeading}
+          milestones={milestones}
+          dir={dir}
+        />
       </div>
     </section>
   );

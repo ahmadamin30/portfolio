@@ -42,13 +42,13 @@ const HomePageContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 selection:bg-zinc-200 dark:selection:bg-zinc-800 selection:text-zinc-900 dark:selection:text-white relative overflow-x-clip flex flex-col items-center transition-colors duration-300">
       
-      {/* GLOBAL FIXED AMBIENT ATMOSPHERE & GLOW ORBS (Spans seamlessly across all sections) */}
+      {/* GLOBAL FIXED AMBIENT ATMOSPHERE & SOFT DIFFUSION (Spans seamlessly across all sections) */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         {/* Glow 1: Top-Right (around Hero / About) */}
         <div
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(circle 800px at 85% 20%, rgba(14, 165, 233, 0.07), transparent 70%)',
+            background: 'radial-gradient(circle 1000px at 82% 20%, rgba(148, 163, 184, 0.03), transparent 72%)',
           }}
         />
 
@@ -56,7 +56,7 @@ const HomePageContent: React.FC = () => {
         <div
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(circle 900px at 15% 55%, rgba(2, 132, 199, 0.05), transparent 70%)',
+            background: 'radial-gradient(circle 1100px at 18% 55%, rgba(14, 165, 233, 0.02), transparent 75%)',
           }}
         />
 
@@ -64,13 +64,13 @@ const HomePageContent: React.FC = () => {
         <div
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(circle 800px at 80% 85%, rgba(14, 165, 233, 0.06), transparent 70%)',
+            background: 'radial-gradient(circle 1000px at 78% 85%, rgba(148, 163, 184, 0.025), transparent 72%)',
           }}
         />
 
         {/* Unified Analog Film Grain Noise Overlay */}
         <div
-          className="absolute inset-0 w-full h-full opacity-[0.20] dark:opacity-[0.24] mix-blend-overlay"
+          className="absolute inset-0 w-full h-full opacity-[0.09] dark:opacity-[0.12] mix-blend-overlay"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
           }}
@@ -78,7 +78,7 @@ const HomePageContent: React.FC = () => {
 
         {/* Subtle Dotted Grid Background Pattern */}
         <div
-          className="absolute inset-0 opacity-35 dark:opacity-20"
+          className="absolute inset-0 opacity-20 dark:opacity-[0.08]"
           style={{
             backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
             backgroundSize: '24px 24px',

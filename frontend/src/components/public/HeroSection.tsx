@@ -120,27 +120,38 @@ export const HeroSection: React.FC = () => {
       {/* Atmosphere 1: Soft Ambient Fog Canvas */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 z-0 w-full h-full opacity-60 dark:opacity-75 pointer-events-none overflow-hidden"
+        className="absolute inset-0 z-0 w-full h-full opacity-80 dark:opacity-90 pointer-events-none overflow-hidden"
       >
         <FogBackground className="w-full h-full" />
       </div>
 
-      {/* Atmosphere 2: Ambient Center Radial Glows */}
+      {/* Atmosphere 2: Subtle Unified Ambient Diffusion */}
       <div
         aria-hidden="true"
         className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
       >
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[750px] sm:h-[750px] rounded-full opacity-[0.035] blur-[160px] bg-sky-500" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] sm:w-[500px] sm:h-[500px] rounded-full opacity-[0.025] blur-[140px] bg-indigo-500" />
+        <div
+          className="absolute inset-0 opacity-70 dark:opacity-100"
+          style={{
+            background:
+              'radial-gradient(ellipse 65% 50% at 50% 45%, rgba(148, 163, 184, 0.03), transparent 75%)',
+          }}
+        />
       </div>
 
       {/* Atmosphere 3: Subtle Film Grain Noise Texture */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 z-0 w-full h-full opacity-[0.12] dark:opacity-[0.16] mix-blend-overlay pointer-events-none"
+        className="absolute inset-0 z-0 w-full h-full opacity-[0.07] dark:opacity-[0.10] mix-blend-overlay pointer-events-none"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='heroNoiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23heroNoiseFilter)'/%3E%3C/svg%3E")`,
         }}
+      />
+
+      {/* Atmosphere 4: Soft Bottom Blend into Unified Canvas */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 z-10 h-32 bg-gradient-to-b from-transparent to-zinc-50 dark:to-[#09090b] pointer-events-none"
       />
 
       {/* Parallax Foreground Wrapper */}
