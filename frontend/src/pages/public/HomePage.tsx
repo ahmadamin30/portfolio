@@ -116,7 +116,7 @@ const HomePageContent: React.FC = () => {
         {/* Subsequent Sections Wrapper (Remains z-10 above sticky Hero) */}
         <div className="relative z-10 w-full bg-zinc-50 dark:bg-[#09090b] transition-colors duration-300">
           {/* Section 02: Projects (Interactive Floating Cursor Showcase) */}
-          <ScrollRevealSection id="projects" className="py-16 px-4 sm:px-8 max-w-5xl mx-auto w-full">
+          <ScrollRevealSection id="projects" className="py-20 px-4 sm:px-8 max-w-6xl mx-auto w-full">
             <ProjectShowcase title={t('nav.projects')} />
           </ScrollRevealSection>
 

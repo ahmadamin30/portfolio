@@ -69,6 +69,12 @@ const UI_DICTIONARY: Record<PortfolioLanguage, Record<string, string>> = {
     'about.feat.precDesc': 'End-to-End Type Safety',
     'about.cta.connect': "Let's Connect",
     'about.cta.resume': 'Download Resume',
+    'projects.item1.title': 'VecMenu',
+    'projects.item1.desc': 'Live QR-based digital menu platform for restaurants with multi-language support and fast mobile browsing.',
+    'projects.item2.title': 'ADVAX Portfolio & CMS',
+    'projects.item2.desc': 'Personal portfolio and custom content management system with a dedicated REST API, trilingual support (EN, AR with RTL, TR), and smooth interactive visuals.',
+    'projects.item3.title': 'Car Rental Web App',
+    'projects.item3.desc': 'A simple, clean car rental web application for browsing available vehicles, viewing details, and booking.',
   },
   ar: {
     'nav.about': 'نبذة',
@@ -122,6 +128,12 @@ const UI_DICTIONARY: Record<PortfolioLanguage, Record<string, string>> = {
     'about.feat.precDesc': 'أمان برمجي شامل',
     'about.cta.connect': 'لنبدأ التواصل',
     'about.cta.resume': 'تحميل السيرة الذاتية',
+    'projects.item1.title': 'VecMenu',
+    'projects.item1.desc': 'منصة قوائم طعام رقمية مباشرة عبر رمز QR للمطاعم مع دعم تعدد اللغات وتصفح سريع عبر الهاتف.',
+    'projects.item2.title': 'بورتفوليو ADVAX ونظام إدارة المحتوى',
+    'projects.item2.desc': 'معرض أعمالي الشخصي ونظام إدارة محتوى مخصص بواجهة REST API مستقلة، ودعم ثلاثي اللغات (EN وAR مع RTL وTR)، وتجربة بصرية تفاعلية سلسة.',
+    'projects.item3.title': 'تطبيق ويب لتأجير السيارات',
+    'projects.item3.desc': 'تطبيق ويب بسيط ونظيف لتأجير السيارات يتيح تصفح المركبات المتاحة، وعرض التفاصيل، وإتمام الحجز.',
   },
   tr: {
     'nav.about': 'Hakkımda',
@@ -175,6 +187,12 @@ const UI_DICTIONARY: Record<PortfolioLanguage, Record<string, string>> = {
     'about.feat.precDesc': 'Uçtan Uca Tip Güvenliği',
     'about.cta.connect': 'İletişime Geçin',
     'about.cta.resume': 'Özgeçmişi İndir',
+    'projects.item1.title': 'VecMenu',
+    'projects.item1.desc': 'Restoranlar için çok dilli destek ve hızlı mobil gezinme sunan canlı QR tabanlı dijital menü platformu.',
+    'projects.item2.title': 'ADVAX Portfolyo ve CMS',
+    'projects.item2.desc': 'Özel bir REST API, üç dilli destek (EN, RTL destekli AR, TR) ve akıcı etkileşimli görsellerle geliştirilmiş kişisel portfolyo ve özel içerik yönetim sistemi.',
+    'projects.item3.title': 'Araç Kiralama Web Uygulaması',
+    'projects.item3.desc': 'Müsait araçları inceleme, detayları görüntüleme ve rezervasyon yapma için sade ve temiz bir araç kiralama web uygulaması.',
   },
 };
 
